@@ -79,7 +79,7 @@ def parse_job_details(soup):
     return joblist
 
 def main():
-    config_file = 'config_example.json'
+    config_file = './backend/config_example.json'
     config_load = load_config(config_file) 
     parse_jobs_from_page(config_load)
 
