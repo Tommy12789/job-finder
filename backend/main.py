@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import time
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from database import db, User
 
 app = Flask(__name__)
 CORS(app) 
@@ -153,5 +154,36 @@ def get_latest_offers():
     else:
         return jsonify({"message": "No job offers available"}), 404
 
+@app.route("/auth/register", methods=["POST"])
+def register_user():
+    try:
+        user_data = request.get_json()
+        print(f"Received user data: {user_data}")  # Debugging: Affiche les données reçues
+
+        if not user_data or 'email' not in user_data:
+            return jsonify({"error": "Missing data"}), 400
+
+        existing_user = User.query.filter_by(email=user_data['email']).first()
+        print(f"Existing user: {existing_user}")  # Debugging: Affiche les informations sur l'utilisateur existant
+
+        if existing_user:
+            return jsonify({"message": "Utilisateur déjà enregistré"}), 200
+
+        new_user = User(
+            nom=user_data.get('family_name', ''),  # Utiliser .get() pour éviter les erreurs de clé
+            prenom=user_data.get('given_name', ''),
+            email=user_data.get('email', '')
+        )
+        print(f"New user to be added: {new_user}")  # Debugging: Affiche les informations sur le nouvel utilisateur
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"message": "Utilisateur enregistré avec succès"}), 201
+
+    except Exception as e:
+        print(f"Error occurred: {e}")  # Debugging: Affiche l'erreur
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
