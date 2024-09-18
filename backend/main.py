@@ -3,9 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 import time
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app) 
 # Store the latest job offers globally
 latest_job_offers = []
 
@@ -126,6 +127,7 @@ def get_offers():
     global latest_job_offers
     try:
         config = request.get_json()
+        print(config)
 
         if not config or 'search_queries' not in config or not isinstance(config['search_queries'], list):
             return jsonify({"error": "Invalid configuration"}), 400
@@ -138,7 +140,7 @@ def get_offers():
         if not latest_job_offers:
             return jsonify({"message": "No job offers found"}), 404
 
-        return jsonify({"message": "Job offers scraped successfully"}), 200
+        return jsonify(latest_job_offers), 200  # Renvoie directement les offres d'emploi
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
