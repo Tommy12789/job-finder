@@ -162,11 +162,10 @@ def get_latest_offers():
     else:
         return jsonify({"message": "No job offers available"}), 404
     
-# Route to handle Auth0 registration and store in Firestore
 @app.route('/auth/register', methods=['POST'])
 def register_user():
     try:
-        # Get the user data from the request (Auth0 callback data)
+        # Get the user data from the request
         user_data = request.get_json()
 
         # Check if the user already exists in Firestore by email
@@ -174,8 +173,9 @@ def register_user():
         existing_user = None
         for doc in user_ref:
             existing_user = doc.to_dict()
-        
+
         if existing_user:
+            print(f"User with email {user_data['email']} already exists.")
             return jsonify({"message": "Utilisateur déjà enregistré"}), 200
 
         # Create new user in Firestore
@@ -187,10 +187,12 @@ def register_user():
 
         # Add new user to Firestore
         db.collection('users').add(new_user)
-
+        print(f"User with email {user_data['email']} successfully registered.")
+        
         return jsonify({"message": "Utilisateur enregistré avec succès"}), 201
 
     except Exception as e:
+        print(f"Error registering user: {e}")
         return jsonify({"error": str(e)}), 500
     
 if __name__ == '__main__':
