@@ -4,11 +4,20 @@ from bs4 import BeautifulSoup
 import time
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 app = Flask(__name__)
 CORS(app) 
 # Store the latest job offers globally
 latest_job_offers = []
+
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate('./backend/jobfinder-5739c-firebase-adminsdk-i3z04-d82584d2c9.json')
+firebase_admin.initialize_app(cred)
+
+# Initialize Firestore DB
+db = firestore.client()
 
 def get_page(url, config, retries=3, delay=1):
     """Fetch the page content from the given URL with retries."""
@@ -152,6 +161,37 @@ def get_latest_offers():
         return jsonify(latest_job_offers), 200
     else:
         return jsonify({"message": "No job offers available"}), 404
+    
+# Route to handle Auth0 registration and store in Firestore
+@app.route('/auth/register', methods=['POST'])
+def register_user():
+    try:
+        # Get the user data from the request (Auth0 callback data)
+        user_data = request.get_json()
 
+        # Check if the user already exists in Firestore by email
+        user_ref = db.collection('users').where('email', '==', user_data['email']).stream()
+        existing_user = None
+        for doc in user_ref:
+            existing_user = doc.to_dict()
+        
+        if existing_user:
+            return jsonify({"message": "Utilisateur déjà enregistré"}), 200
+
+        # Create new user in Firestore
+        new_user = {
+            'nom': user_data.get('family_name', ''),
+            'prenom': user_data.get('given_name', ''),
+            'email': user_data.get('email', '')
+        }
+
+        # Add new user to Firestore
+        db.collection('users').add(new_user)
+
+        return jsonify({"message": "Utilisateur enregistré avec succès"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

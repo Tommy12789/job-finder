@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react'; // Importez useAuth0
 import JobSearchForm from './components/JobSearchForm';
 import JobOffers from './components/JobOffers';
+import LoginButton from './components/LoginButton';
+import LogoutButton from './components/LogoutButton';
+import Profile from './components/Profile';
 
 function App() {
   const [jobOffers, setJobOffers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { isAuthenticated } = useAuth0(); 
 
   const handleSearch = async (config) => {
     setLoading(true);
@@ -17,13 +22,12 @@ function App() {
         body: JSON.stringify(config),
       });
 
-      // Vérifie que la réponse est au format JSON avant de la parser
       if (!response.ok) {
-        const errorMessage = await response.text(); // Récupérer le message d'erreur
+        const errorMessage = await response.text();
         throw new Error(errorMessage || 'Une erreur est survenue');
       }
 
-      const data = await response.json(); // Cela ne doit être fait que si la réponse est valide
+      const data = await response.json();
       setJobOffers(data);
     } catch (error) {
       console.error('Erreur lors de la requête :', error);
@@ -35,8 +39,18 @@ function App() {
   return (
     <div>
       <h1>Moteur de recherche d'emploi</h1>
-      <JobSearchForm onSearch={handleSearch} />
-      {loading ? <p>Recherche en cours...</p> : <JobOffers jobOffers={jobOffers} />}
+      {!isAuthenticated ? (
+        <div>
+          <LoginButton /> {}
+        </div>
+      ) : (
+        <div>
+          <LogoutButton /> {}
+          <Profile /> {}
+          <JobSearchForm onSearch={handleSearch} />
+          {loading ? <p>Recherche en cours...</p> : <JobOffers jobOffers={jobOffers} />}
+        </div>
+      )}
     </div>
   );
 }
