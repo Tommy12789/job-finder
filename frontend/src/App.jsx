@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import JobSearchForm from './components/JobSearchForm';
 import JobOffers from './components/JobOffers';
+import Navbar from './components/Navbar';
 
 function App() {
   const [jobOffers, setJobOffers] = useState([]);
@@ -33,10 +34,15 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>Moteur de recherche d'emploi</h1>
-      <JobSearchForm onSearch={handleSearch} />
-      {loading ? <p>Recherche en cours...</p> : <JobOffers jobOffers={jobOffers} />}
+    <div className='flex'>
+      <div>
+        <Navbar />
+      </div>
+      <div>
+        <h1>Moteur de recherche d'emploi</h1>
+        <JobSearchForm onSearch={handleSearch} />
+        {loading ? <p>Recherche en cours...</p> : <JobOffers jobOffers={jobOffers} />}
+      </div>
     </div>
   );
 }
