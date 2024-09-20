@@ -16,7 +16,7 @@ const Profile = () => {
             body: JSON.stringify(user),
           });
         } catch (error) {
-          console.error('Erreur lors de l\'enregistrement de l\'utilisateur :', error);
+          console.error("Erreur lors de l'enregistrement de l'utilisateur :", error);
         }
       }
     };
@@ -26,10 +26,15 @@ const Profile = () => {
 
   return (
     isAuthenticated && (
-      <div>
-        <h2>Bienvenue, {user.name}</h2>
-        <img src={user.picture} alt={user.name} />
-        <p>Email: {user.email}</p>
+      <div className='flex flex-col items-center gap-3 p-3'>
+        <h2 className='text-l'>
+          Bienvenue, <strong> {user.name}</strong>
+        </h2>
+        <img
+          className='rounded-full border-2 border-slate-400'
+          src={user.picture}
+          alt={user.name}
+        />
       </div>
     )
   );
