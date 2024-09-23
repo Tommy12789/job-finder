@@ -37,7 +37,7 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
               }`}
               onClick={() => handleSelectOffer(offer)}
             >
-              <h3 className='text-lg font-bold text-slate-900 mb-2'>{offer.title}</h3>
+              <h3 className='text-lg font-bold text-slate-900 mb-2 pr-10'>{offer.title}</h3>
               <p className='text-slate-700 mb-1'>
                 <strong>Entreprise:</strong> {offer.company}
               </p>
@@ -47,36 +47,34 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
               <p className='text-slate-700 mb-1'>
                 <strong>Date:</strong> {offer.date}
               </p>
-              <div className='flex flex-row p-10'>
-                <Tooltip
-                  title='Unlike'
-                  placement='bottom-start'
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        fontWeight: '400',
-                        bgcolor: '#f8fafc',
-                        color: '#0f172a',
-                        padding: '4px 10px',
-                        fontSize: '14px',
-                        borderRadius: '8px',
-                        border: 'solid #e2e8f0',
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                      },
+              <Tooltip
+                title='Unlike'
+                placement='bottom-start'
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      fontWeight: '400',
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      padding: '4px 10px',
+                      fontSize: '14px',
+                      borderRadius: '8px',
+                      border: 'solid #e2e8f0',
+                      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     },
+                  },
+                }}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFavoritesClick(offer);
                   }}
+                  className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
                 >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFavoritesClick(offer);
-                    }}
-                    className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
-                  >
-                    <FavoriteOutlinedIcon />
-                  </button>
-                </Tooltip>
-              </div>
+                  <FavoriteOutlinedIcon />
+                </button>
+              </Tooltip>
             </li>
           ))}
         </ul>

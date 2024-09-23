@@ -51,36 +51,34 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
               <p className='text-slate-700 mb-1'>
                 <strong>Date:</strong> {offer.date}
               </p>
-              <div className='flex flex-row p-10'>
-                <Tooltip
-                  title={isFavorite(offer) ? 'Unlike' : 'Like'}
-                  placement='bottom-start'
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        fontWeight: '400',
-                        bgcolor: '#f8fafc',
-                        color: '#0f172a',
-                        padding: '4px 10px',
-                        fontSize: '14px',
-                        borderRadius: '8px',
-                        border: 'solid #e2e8f0',
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                      },
+              <Tooltip
+                title={isFavorite(offer) ? 'Unlike' : 'Like'}
+                placement='bottom-start'
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      fontWeight: '400',
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      padding: '4px 10px',
+                      fontSize: '14px',
+                      borderRadius: '8px',
+                      border: 'solid #e2e8f0',
+                      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     },
+                  },
+                }}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFavoritesClick(offer);
                   }}
+                  className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
                 >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFavoritesClick(offer);
-                    }}
-                    className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
-                  >
-                    {isFavorite(offer) ? <FavoriteOutlinedIcon /> : <FavoriteBorderOutlinedIcon />}
-                  </button>
-                </Tooltip>
-              </div>
+                  {isFavorite(offer) ? <FavoriteOutlinedIcon /> : <FavoriteBorderOutlinedIcon />}
+                </button>
+              </Tooltip>
             </li>
           ))}
         </ul>
