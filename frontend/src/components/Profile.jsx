@@ -26,12 +26,12 @@ const Profile = () => {
 
   return (
     isAuthenticated && (
-      <div className='flex flex-col items-center gap-3 p-3'>
+      <div className='flex flex-col items-center gap-3 pt-2 pb-3 px-4 border-b '>
         <h2 className='text-l'>
           Bienvenue, <strong> {user.name}</strong>
         </h2>
         <img
-          className='rounded-full border-2 border-slate-400'
+          className='rounded-full border-2 border-slate-200'
           src={user.picture}
           alt={user.name}
         />

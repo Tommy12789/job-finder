@@ -73,6 +73,7 @@ function App() {
       <Sidebar onSectionClick={handleSidebarClick} />
       <div className='flex flex-1 flex-col'>
         <Header
+          onSectionClick={handleSidebarClick}
           isAuthenticated={isAuthenticated}
           selectedSection={selectedSection}
         />
