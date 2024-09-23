@@ -10,13 +10,19 @@ function JobOffers({ jobOffers }) {
   return (
     <div className='flex'>
       {/* Cadre à gauche - Liste des offres */}
-      <div className='w-1/3 p-4 bg-slate-100 border-r border-slate-300'>
-        <h2 className='text-xl font-semibold text-slate-800 mb-4'>Offres d'emploi</h2>
-        <ul className='space-y-4'>
+      <div className='w-2/5 border-r border-slate-300'>
+      <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
+        {jobOffers.length > 0 
+          ? `${jobOffers.length} offre${jobOffers.length > 1 ? 's' : ''} d'emploi trouvé${jobOffers.length > 1 ? 's' : ''}` 
+          : "Aucune offre d'emploi trouvée"}
+      </h2>        
+      <ul className='max-h-[400px] overflow-y-auto'>
           {jobOffers.map((offer, index) => (
             <li
               key={index}
-              className='p-4 bg-white border border-slate-300 rounded-lg shadow-sm cursor-pointer hover:bg-slate-50'
+              className={`p-4 shadow-sm cursor-pointer hover:bg-slate-100 ${
+                selectedOffer === offer ? 'bg-slate-100 border-l-2 border-slate-900' : ''
+              }`}
               onClick={() => handleSelectOffer(offer)}
             >
               <h3 className='text-lg font-bold text-slate-900 mb-2'>{offer.title}</h3>
@@ -35,7 +41,7 @@ function JobOffers({ jobOffers }) {
       </div>
 
       {/* Cadre à droite - Détails de l'offre sélectionnée */}
-      <div className='w-2/3 p-4 bg-slate-50'>
+      <div className='w-3/5 p-4'>
         {selectedOffer ? (
           <div>
             <h2 className='text-2xl font-semibold text-slate-800 mb-4'>{selectedOffer.title}</h2>
@@ -59,7 +65,13 @@ function JobOffers({ jobOffers }) {
                 {selectedOffer.job_url}
               </a>
             </p>
-            <p className='text-slate-600 mt-4'>{selectedOffer.job_description}</p>
+            <p className='text-slate-600 mt-4 p-4 max-h-[800px] overflow-y-auto'>
+              {selectedOffer && selectedOffer.job_description ? (
+                <span dangerouslySetInnerHTML={{ __html: selectedOffer.job_description.replace(/\n/g, '<br />') }}></span>
+              ) : (
+                'No description available'
+              )}
+            </p>
           </div>
         ) : (
           <p className='text-slate-700'>Veuillez sélectionner une offre pour voir les détails.</p>

@@ -38,7 +38,7 @@ function JobSearchForm({ onSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='p-10 text-slate-800 justify-between flex-1 flex-wrap bg-slate-100'
+      className='p-10 text-slate-800 justify-between flex-1 flex-wrap mb-4'
     >
       <div className='flex gap-10'>
         <div className='flex-1 min-w-[200px]'>
@@ -74,7 +74,7 @@ function JobSearchForm({ onSearch }) {
           />
         </div>
       </div>
-      <div className=''>
+      <div className='flex justify-end pt-5'>
         <button
           className='text-white bg-slate-400 hover:bg-slate-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition-color ease-in-out duration-300'
           type='submit'
