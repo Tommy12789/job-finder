@@ -30,8 +30,8 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
             : "Aucune offre d'emploi trouvée"}
         </h2>
         <ul
-          className='overflow-y-auto border-r'
-          style={{ height: 'calc(100vh - 283px)' }}
+          className='overflow-y-auto'
+          style={{ height: 'calc(100vh - 235px)' }}
         >
           {jobOffers.map((offer, index) => (
             <li
@@ -41,7 +41,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
               }`}
               onClick={() => handleSelectOffer(offer)}
             >
-              <h3 className='text-lg font-bold text-slate-900 mb-2'>{offer.title}</h3>
+              <h3 className='text-lg font-bold text-slate-900 mb-2 pr-10'>{offer.title}</h3>
               <p className='text-slate-700 mb-1'>
                 <strong>Entreprise:</strong> {offer.company}
               </p>
@@ -112,7 +112,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
             </p>
             <p
               className='text-slate-600 mt-4 p-4 overflow-y-auto'
-              style={{ height: 'calc(100vh - 423px)' }}
+              style={{ height: 'calc(100vh - 375px)' }}
             >
               {selectedOffer && selectedOffer.job_description ? (
                 <span
