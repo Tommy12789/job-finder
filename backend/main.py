@@ -33,7 +33,6 @@ def get_page(url, config, retries=3, delay=1):
             print("Timeout error")
         except Exception as e:
             print(f"An error occurred: {e}")
-        time.sleep(delay)
     return None
 
 def parse_jobs_from_page(config):

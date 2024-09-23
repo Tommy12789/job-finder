@@ -72,9 +72,9 @@ function App() {
   };
 
   return (
-    <div className='flex h-screen w-screen'>
+    <div className='flex h-screen w-screen overflow-hidden'>
       <Sidebar onSectionClick={handleSidebarClick} />
-      <div className='flex flex-1 flex-col space-y'>
+      <div className='flex flex-1 flex-col space-y max-h-screen'>
         <Header
           onSectionClick={handleSidebarClick}
           isAuthenticated={isAuthenticated}

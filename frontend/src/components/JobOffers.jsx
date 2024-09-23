@@ -10,13 +10,18 @@ function JobOffers({ jobOffers }) {
   return (
     <div className='flex flex-1'>
       {/* Cadre à gauche - Liste des offres */}
-      <div className='w-2/5 border-r border-slate-300'>
-      <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
-        {jobOffers.length > 0 
-          ? `${jobOffers.length} offre${jobOffers.length > 1 ? 's' : ''} d'emploi trouvé${jobOffers.length > 1 ? 's' : ''}` 
-          : "Aucune offre d'emploi trouvée"}
-      </h2>        
-      <ul className='max-h-[400px] overflow-y-auto'>
+      <div className='w-2/5 border-r border-slate-300 flex flex-col'>
+        <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
+          {jobOffers.length > 0
+            ? `${jobOffers.length} offre${jobOffers.length > 1 ? 's' : ''} d'emploi trouvé${
+                jobOffers.length > 1 ? 's' : ''
+              }`
+            : "Aucune offre d'emploi trouvée"}
+        </h2>
+        <ul
+          className='overflow-y-auto'
+          style={{ height: 'calc(100vh - 283px)' }}
+        >
           {jobOffers.map((offer, index) => (
             <li
               key={index}
@@ -40,8 +45,7 @@ function JobOffers({ jobOffers }) {
         </ul>
       </div>
 
-      {/* Cadre à droite - Détails de l'offre sélectionnée */}
-      <div className='w-3/5 p-4'>
+      <div className='w-3/5 p-4 h-full overflow-y-auto'>
         {selectedOffer ? (
           <div>
             <h2 className='text-2xl font-semibold text-slate-800 mb-4'>{selectedOffer.title}</h2>
@@ -65,9 +69,16 @@ function JobOffers({ jobOffers }) {
                 {selectedOffer.job_url}
               </a>
             </p>
-            <p className='text-slate-600 mt-4 p-4 max-h-[800px] overflow-y-auto'>
+            <p
+              className='text-slate-600 mt-4 p-4 overflow-y-auto'
+              style={{ height: 'calc(100vh - 423px)' }}
+            >
               {selectedOffer && selectedOffer.job_description ? (
-                <span dangerouslySetInnerHTML={{ __html: selectedOffer.job_description.replace(/\n/g, '<br />') }}></span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: selectedOffer.job_description.replace(/\n/g, '<br />'),
+                  }}
+                ></span>
               ) : (
                 'No description available'
               )}

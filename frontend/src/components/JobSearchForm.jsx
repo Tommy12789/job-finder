@@ -38,20 +38,20 @@ function JobSearchForm({ onSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='p-10 text-slate-800 justify-between bg-slate-100 w-full'
+      className='flex flex-row p-10 text-slate-800 justify-between bg-slate-100 w-full'
     >
-      <div className='flex gap-10'>
-        <div className='flex-1 min-w-[200px]'>
+      <div className='flex gap-5 w-3/4'>
+        <div className='w-1/3'>
           <label className='block mb-2 text-sm font-medium text-slate-900'>Mots-clés</label>
           <input
-            className='bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+            className='bg-slate-50  border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
             type='text'
             name='keywords'
             value={formData.keywords}
             onChange={handleChange}
           />
         </div>
-        <div className='flex-1 min-w-[200px]'>
+        <div className='w-1/3'>
           <label className='block mb-2 text-sm font-medium text-slate-900'>Localisation</label>
           <input
             className='bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
@@ -61,7 +61,7 @@ function JobSearchForm({ onSearch }) {
             onChange={handleChange}
           />
         </div>
-        <div className='flex-1 min-w-[400px]'>
+        <div className='w-1/3'>
           <label className='block mb-2 text-sm font-medium text-slate-900'>
             Niveau d'expérience
           </label>
@@ -74,7 +74,7 @@ function JobSearchForm({ onSearch }) {
           />
         </div>
       </div>
-      <div className='flex justify-end pt-5'>
+      <div className=' justify-end pt-5'>
         <button
           className='text-white bg-slate-400 hover:bg-slate-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition-color ease-in-out duration-300'
           type='submit'
