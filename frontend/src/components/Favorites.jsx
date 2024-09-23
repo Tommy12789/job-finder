@@ -1,6 +1,7 @@
 import React from 'react';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import { useState } from 'react';
+import Tooltip from '@mui/material/Tooltip';
 
 export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
   const [selectedOffer, setSelectedOffer] = useState(null);
@@ -16,7 +17,7 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
   return (
     <div className='flex flex-1'>
       {/* Cadre à gauche - Liste des favoris */}
-      <div className='w-2/5 border-r border-slate-300 flex flex-col'>
+      <div className='w-2/5 border-slate-300 flex flex-col'>
         <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
           {favoriteJobOffers.length > 0
             ? `Vous avez ${favoriteJobOffers.length} offre${
@@ -25,7 +26,7 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
             : "Vous n'avez pas encore d'offres en favori"}
         </h2>
         <ul
-          className='overflow-y-auto'
+          className='overflow-y-auto border-r'
           style={{ height: 'calc(100vh - 135px)' }}
         >
           {favoriteJobOffers.map((offer, index) => (
@@ -46,15 +47,36 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
               <p className='text-slate-700 mb-1'>
                 <strong>Date:</strong> {offer.date}
               </p>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFavoritesClick(offer);
-                }}
-                className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
-              >
-                <FavoriteOutlinedIcon />
-              </button>
+              <div className='flex flex-row p-10'>
+                <Tooltip
+                  title='Unlike'
+                  placement='bottom-start'
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        fontWeight: '400',
+                        bgcolor: '#f8fafc',
+                        color: '#0f172a',
+                        padding: '4px 10px',
+                        fontSize: '14px',
+                        borderRadius: '8px',
+                        border: 'solid #e2e8f0',
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                      },
+                    },
+                  }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFavoritesClick(offer);
+                    }}
+                    className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
+                  >
+                    <FavoriteOutlinedIcon />
+                  </button>
+                </Tooltip>
+              </div>
             </li>
           ))}
         </ul>
