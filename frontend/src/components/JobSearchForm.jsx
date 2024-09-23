@@ -22,7 +22,7 @@ function JobSearchForm({ onSearch }) {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
       },
-      pages_to_scrape: 10,
+      pages_to_scrape: 5,
       timespan: 'r86400',
       search_queries: [
         {
@@ -38,7 +38,7 @@ function JobSearchForm({ onSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex flex-row p-10 text-slate-800 justify-between bg-slate-100 w-full'
+      className='flex flex-row px-10 py-6 text-slate-800 justify-between bg-slate-100 w-full'
     >
       <div className='flex gap-5 w-3/4'>
         <div className='w-1/3'>

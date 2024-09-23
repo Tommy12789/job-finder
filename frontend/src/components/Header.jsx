@@ -27,7 +27,7 @@ export default function Header({ selectedSection, isAuthenticated, onSectionClic
   };
 
   return (
-    <header className='bg-slate-50 w-full py-4 flex items-center justify-between px-10 text-slate-700'>
+    <header className='bg-slate-50 w-full py-2 flex items-center justify-between px-10 text-slate-700'>
       <p>{Capitalize(selectedSection)}</p>
       <button
         onClick={handleClick}

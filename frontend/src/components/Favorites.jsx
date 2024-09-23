@@ -26,7 +26,7 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
         </h2>
         <ul
           className='overflow-y-auto'
-          style={{ height: 'calc(100vh - 135px)' }}
+          style={{ height: 'calc(100vh - 118px)' }}
         >
           {favoriteJobOffers.map((offer, index) => (
             <li
@@ -87,7 +87,7 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
             </p>
             <p
               className='text-slate-600 mt-4 p-4 overflow-y-auto'
-              style={{ height: 'calc(100vh - 275px)' }}
+              style={{ height: 'calc(100vh - 256px)' }}
             >
               {selectedOffer && selectedOffer.job_description ? (
                 <span

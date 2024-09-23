@@ -16,7 +16,7 @@ export default function Sidebar({ onSectionClick }) {
   };
 
   return (
-    <aside className='border-r h-screen flex flex-col justify-between items-center px-2 py-6 fill-current text-slate-600 border-slate-400'>
+    <aside className='border-r h-screen flex flex-col justify-between items-center px-2 py-4 fill-current text-slate-600 border-slate-400'>
       <div className='items-center flex flex-col gap-3'>
         {/* Bouton "Home" toujours actif avec fond noir */}
         <Tooltip
@@ -25,11 +25,14 @@ export default function Sidebar({ onSectionClick }) {
           componentsProps={{
             tooltip: {
               sx: {
-                bgcolor: '#f8fafc', // Fond couleur teal-50
-                color: 'slate.900', // Texte couleur teal-900
-                fontSize: '14px', // Taille du texte
-                borderRadius: '8px', // Coins arrondis
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Ombre
+                fontWeight: '400',
+                bgcolor: '#f8fafc',
+                color: '#0f172a',
+                padding: '4px 10px',
+                fontSize: '14px',
+                borderRadius: '8px',
+                border: 'solid #e2e8f0',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               },
             },
           }}
