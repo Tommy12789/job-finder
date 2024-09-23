@@ -11,6 +11,7 @@ app = Flask(__name__)
 CORS(app) 
 # Store the latest job offers globally
 latest_job_offers = []
+favorites = []
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate('./backend/jobfinder-5739c-firebase-adminsdk-i3z04-d82584d2c9.json')
@@ -33,6 +34,7 @@ def get_page(url, config, retries=3, delay=1):
             print("Timeout error")
         except Exception as e:
             print(f"An error occurred: {e}")
+        time.sleep(delay)
     return None
 
 def parse_jobs_from_page(config):
@@ -161,33 +163,115 @@ def get_latest_offers():
     else:
         return jsonify({"message": "No job offers available"}), 404
     
+@app.route('/add-favorite', methods=['POST'])
+def add_favorite():
+    try:
+        user_email = request.json.get('email')
+        job_offer = request.json.get('jobOffer')
+
+        if not user_email or not job_offer:
+            return jsonify({"error": "Données manquantes"}), 400
+
+        # Récupérer la référence de l'utilisateur dans Firestore
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            favorites = user_data.get('favorites', [])
+
+            # Vérifier si l'offre existe déjà dans les favoris
+            if job_offer not in favorites:
+                favorites.append(job_offer)
+                user_ref.update({'favorites': favorites})
+                return jsonify({"message": "Favori ajouté avec succès"}), 200
+            else:
+                return jsonify({"message": "Cette offre est déjà dans les favoris"}), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error adding favorite: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/get-favorites', methods=['POST'])
+def get_favorites():
+    try:
+        user_email = request.json.get('email')
+
+        if not user_email:
+            return jsonify({"error": "Email est requis"}), 400
+
+        # Récupérer la référence de l'utilisateur dans Firestore
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            favorites = user_data.get('favorites', [])
+            return jsonify(favorites), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error retrieving favorites: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/remove-favorite', methods=['POST'])
+def remove_favorite():
+    try:
+        user_email = request.json.get('email')
+        job_offer = request.json.get('jobOffer')
+
+        if not user_email or not job_offer:
+            return jsonify({"error": "Données manquantes"}), 400
+
+        # Récupérer la référence de l'utilisateur dans Firestore
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            favorites = user_data.get('favorites', [])
+
+            # Vérifier si l'offre est dans les favoris
+            updated_favorites = [fav for fav in favorites if fav['title'] != job_offer['title']]
+            user_ref.update({'favorites': updated_favorites})
+
+            return jsonify({"message": "Favori supprimé avec succès"}), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error removing favorite: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    
 @app.route('/auth/register', methods=['POST'])
 def register_user():
     try:
-        # Get the user data from the request
         user_data = request.get_json()
 
-        # Check if the user already exists in Firestore by email
-        user_ref = db.collection('users').where('email', '==', user_data['email']).stream()
-        existing_user = None
-        for doc in user_ref:
-            existing_user = doc.to_dict()
+        if not user_data.get('email'):
+            return jsonify({"error": "Email est requis"}), 400
 
-        if existing_user:
-            print(f"User with email {user_data['email']} already exists.")
+        # Rechercher l'utilisateur par email
+        user_ref = db.collection('users').document(user_data['email'])
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
             return jsonify({"message": "Utilisateur déjà enregistré"}), 200
 
-        # Create new user in Firestore
+        # Créer un nouveau document utilisateur
         new_user = {
             'nom': user_data.get('family_name', ''),
             'prenom': user_data.get('given_name', ''),
-            'email': user_data.get('email', '')
+            'email': user_data.get('email', ''),
+            'favorites': [] 
         }
 
-        # Add new user to Firestore
-        db.collection('users').add(new_user)
-        print(f"User with email {user_data['email']} successfully registered.")
-        
+        user_ref.set(new_user)
         return jsonify({"message": "Utilisateur enregistré avec succès"}), 201
 
     except Exception as e:
