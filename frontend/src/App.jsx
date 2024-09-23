@@ -7,6 +7,7 @@ import LogoutButton from './components/LogoutButton';
 import Profile from './components/Profile';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import Settings from './components/Settings';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -54,15 +55,17 @@ function App() {
         return <Profile />;
       case 'search':
         return (
-          <div>
+          <>
             <JobSearchForm onSearch={handleSearch} />
             {loading ? <p>Recherche en cours...</p> : <JobOffers jobOffers={jobOffers} />}
-          </div>
+          </>
         );
       case 'offers':
         return <JobOffers jobOffers={jobOffers} />;
       case 'favorites':
         return <p>favorites</p>;
+      case 'settings':
+        return <Settings />;
       default:
         return <Profile />;
     }
@@ -77,9 +80,7 @@ function App() {
           isAuthenticated={isAuthenticated}
           selectedSection={selectedSection}
         />
-        <div>
-          <div>{renderContent()}</div>
-        </div>
+        <div className='flex flex-1 flex-col'>{renderContent()}</div>
       </div>
     </div>
   );

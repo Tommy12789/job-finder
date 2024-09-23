@@ -26,32 +26,15 @@ export default function Header({ selectedSection, isAuthenticated, onSectionClic
     setAnchorEl(null);
   };
 
-  const renderProfileLogo = () => {
-    if (isAuthenticated) {
-      return (
-        <button
-          onClick={handleClick}
-          className='flex items-center rounded-full bg-slate-50 p-2 border hover:shadow-inner transition-all ease-in-out duration-300'
-        >
-          <PersonRoundedIcon className='text-slate-900' />
-        </button>
-      );
-    } else {
-      return (
-        <button
-          onClick={handleClick}
-          className='flex items-center rounded-full bg-slate-50 p-2 border hover:shadow-inner transition-all ease-in-out duration-300'
-        >
-          <PersonRoundedIcon className='text-slate-900' />
-        </button>
-      );
-    }
-  };
-
   return (
     <header className='bg-slate-50 w-full py-4 flex items-center justify-between px-10 text-slate-700'>
       <p>{Capitalize(selectedSection)}</p>
-      {renderProfileLogo()}
+      <button
+        onClick={handleClick}
+        className='flex items-center rounded-full bg-white p-2 border hover:shadow-inner transition-all ease-in-out duration-300'
+      >
+        <PersonRoundedIcon className='text-slate-900' />
+      </button>{' '}
       <Menu
         id='basic-menu'
         anchorEl={anchorEl}

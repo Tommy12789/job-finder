@@ -3,9 +3,5 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Roboto', Arial, sans-serif;
-  position: fixed;
-  margin: 0;
-  padding: 0;
-  height: 100%;
+  font-family: -apple-system, system-ui, 'Roboto', Arial, sans-serif;
 }

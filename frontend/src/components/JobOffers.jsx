@@ -8,7 +8,7 @@ function JobOffers({ jobOffers }) {
   };
 
   return (
-    <div className='flex'>
+    <div className='flex flex-1'>
       {/* Cadre à gauche - Liste des offres */}
       <div className='w-2/5 border-r border-slate-300'>
       <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
