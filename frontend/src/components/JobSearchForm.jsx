@@ -38,7 +38,7 @@ function JobSearchForm({ onSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex flex-row px-10 py-6 text-slate-800 justify-between bg-slate-100 w-full'
+      className='flex flex-row px-10 py-6 text-slate-800 justify-between w-full'
     >
       <div className='flex gap-5 w-3/4'>
         <div className='w-1/3'>
