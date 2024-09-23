@@ -1,38 +1,34 @@
-import React, { useState } from 'react';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import React from 'react';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { useState } from 'react';
 
-function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
+export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
   const [selectedOffer, setSelectedOffer] = useState(null);
-
-  const handleSelectOffer = (offer) => {
-    setSelectedOffer(offer);
-  };
 
   const handleFavoritesClick = (jobOffer) => {
     handleFavoriteClick(jobOffer);
   };
 
-  const isFavorite = (offer) => {
-    return favoriteJobOffers.some((fav) => fav.title === offer.title);
+  const handleSelectOffer = (offer) => {
+    setSelectedOffer(offer);
   };
 
   return (
     <div className='flex flex-1'>
-      {/* Cadre à gauche - Liste des offres */}
+      {/* Cadre à gauche - Liste des favoris */}
       <div className='w-2/5 border-r border-slate-300 flex flex-col'>
         <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
-          {jobOffers.length > 0
-            ? `${jobOffers.length} offre${jobOffers.length > 1 ? 's' : ''} d'emploi trouvé${
-                jobOffers.length > 1 ? 's' : ''
-              }`
-            : "Aucune offre d'emploi trouvée"}
+          {favoriteJobOffers.length > 0
+            ? `Vous avez ${favoriteJobOffers.length} offre${
+                favoriteJobOffers.length > 1 ? 's' : ''
+              } en favori`
+            : "Vous n'avez pas encore d'offres en favori"}
         </h2>
         <ul
           className='overflow-y-auto'
-          style={{ height: 'calc(100vh - 283px)' }}
+          style={{ height: 'calc(100vh - 135px)' }}
         >
-          {jobOffers.map((offer, index) => (
+          {favoriteJobOffers.map((offer, index) => (
             <li
               key={index}
               className={`p-4 shadow-sm cursor-pointer hover:bg-slate-100 relative ${
@@ -57,13 +53,14 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
                 }}
                 className='absolute top-4 right-4 bg-slate-50 p-2 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
               >
-                {isFavorite(offer) ? <FavoriteOutlinedIcon /> : <FavoriteBorderOutlinedIcon />}
+                <FavoriteOutlinedIcon />
               </button>
             </li>
           ))}
         </ul>
       </div>
 
+      {/* Cadre à droite - Détails de l'offre sélectionnée */}
       <div className='w-3/5 p-4 h-full overflow-y-auto'>
         {selectedOffer ? (
           <div>
@@ -90,7 +87,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
             </p>
             <p
               className='text-slate-600 mt-4 p-4 overflow-y-auto'
-              style={{ height: 'calc(100vh - 423px)' }}
+              style={{ height: 'calc(100vh - 275px)' }}
             >
               {selectedOffer && selectedOffer.job_description ? (
                 <span
@@ -99,7 +96,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
                   }}
                 ></span>
               ) : (
-                'No description available'
+                'Aucune description disponible'
               )}
             </p>
           </div>
@@ -110,5 +107,3 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
     </div>
   );
 }
-
-export default JobOffers;

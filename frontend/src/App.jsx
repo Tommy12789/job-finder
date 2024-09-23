@@ -8,6 +8,7 @@ import Profile from './components/Profile';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Settings from './components/Settings';
+import Favorites from './components/Favorites';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -15,14 +16,24 @@ import '@fontsource/roboto/700.css';
 
 function App() {
   const [jobOffers, setJobOffers] = useState([]);
+  const [favoriteJobOffers, setFavoriteJobOffers] = useState([]);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth0();
   const [selectedSection, setSelectedSection] = useState('search');
 
   const handleSidebarClick = (section) => {
     setSelectedSection(section);
-    console.log(selectedSection);
   };
+
+  function handleFavoriteClick(jobOffer) {
+    if (favoriteJobOffers.some((fav) => fav.title === jobOffer.title)) {
+      setFavoriteJobOffers((prevFavoriteJobOffers) =>
+        prevFavoriteJobOffers.filter((fav) => fav.title !== jobOffer.title)
+      );
+    } else {
+      setFavoriteJobOffers((prevFavoriteJobOffers) => [...prevFavoriteJobOffers, jobOffer]);
+    }
+  }
 
   const handleSearch = async (config) => {
     setLoading(true);
@@ -77,14 +88,23 @@ function App() {
                 </svg>
               </div>
             ) : (
-              <JobOffers jobOffers={jobOffers} />
+              <JobOffers
+                jobOffers={jobOffers}
+                handleFavoriteClick={handleFavoriteClick}
+                favoriteJobOffers={favoriteJobOffers}
+              />
             )}
           </>
         );
       case 'offers':
         return <JobOffers jobOffers={jobOffers} />;
       case 'favorites':
-        return <p>favorites</p>;
+        return (
+          <Favorites
+            favoriteJobOffers={favoriteJobOffers}
+            handleFavoriteClick={handleFavoriteClick}
+          />
+        );
       case 'settings':
         return <Settings />;
       default:
