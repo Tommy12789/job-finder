@@ -16,14 +16,14 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
 
   return (
     <div className='flex flex-1'>
-      {/* Cadre à gauche - Liste des favoris */}
+      {/* Left panel - Favorites list */}
       <div className='w-2/5 border-slate-300 flex flex-col'>
         <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
           {favoriteJobOffers.length > 0
-            ? `Vous avez ${favoriteJobOffers.length} offre${
+            ? `You have ${favoriteJobOffers.length} offer${
                 favoriteJobOffers.length > 1 ? 's' : ''
-              } en favori`
-            : "Vous n'avez pas encore d'offres en favori"}
+              } in favorites`
+            : "You don't have any favorite offers"}
         </h2>
         <ul
           className='overflow-y-auto'
@@ -37,16 +37,16 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
               }`}
               onClick={() => handleSelectOffer(offer)}
             >
-              <h3 className='text-lg font-bold text-slate-900 mb-2 pr-10'>{offer.title}</h3>
-              <p className='text-slate-700 mb-1'>
-                <strong>Entreprise:</strong> {offer.company}
+              <p className='flex gap-2 items-center mb-2'>
+                <img
+                  className='w-9 h-9 rounded-full border'
+                  src={offer.company_logo}
+                  alt=''
+                />
+                <h3 className='text-lg font-bold text-slate-900 pr-10'>{offer.title}</h3>
               </p>
-              <p className='text-slate-700 mb-1'>
-                <strong>Localisation:</strong> {offer.location}
-              </p>
-              <p className='text-slate-700 mb-1'>
-                <strong>Date:</strong> {offer.date}
-              </p>
+              <p className='text-slate-700 mb-1'>{offer.company}</p>
+              <p className='text-slate-400 mb-1'>{offer.location}</p>
               <Tooltip
                 title='Unlike'
                 placement='bottom-start'
@@ -80,22 +80,29 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
         </ul>
       </div>
 
-      {/* Cadre à droite - Détails de l'offre sélectionnée */}
+      {/* Right panel - Selected offer details */}
       <div className='w-3/5 p-4 h-full overflow-y-auto'>
         {selectedOffer ? (
           <div>
-            <h2 className='text-2xl font-semibold text-slate-800 mb-4'>{selectedOffer.title}</h2>
-            <p className='text-slate-700 mb-2'>
-              <strong>Entreprise:</strong> {selectedOffer.company}
+            <p className='flex gap-4 items-center mb-4'>
+              <img
+                className='rounded-full border w-16 h-16'
+                src={selectedOffer.company_logo}
+                alt=''
+              />
+              <h2 className='text-2xl font-semibold text-slate-800'>{selectedOffer.title}</h2>
             </p>
             <p className='text-slate-700 mb-2'>
-              <strong>Localisation:</strong> {selectedOffer.location}
+              <strong>Company:</strong> {selectedOffer.company}
+            </p>
+            <p className='text-slate-700 mb-2'>
+              <strong>Location:</strong> {selectedOffer.location}
             </p>
             <p className='text-slate-700 mb-2'>
               <strong>Date:</strong> {selectedOffer.date}
             </p>
             <p className='text-slate-700 mb-2'>
-              <strong>URL de l'offre:</strong>{' '}
+              <strong>Job URL:</strong>{' '}
               <a
                 href={selectedOffer.job_url}
                 target='_blank'
@@ -116,12 +123,12 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
                   }}
                 ></span>
               ) : (
-                'Aucune description disponible'
+                'No description available'
               )}
             </p>
           </div>
         ) : (
-          <p className='text-slate-700'>Veuillez sélectionner une offre pour voir les détails.</p>
+          <p className='text-slate-700'>Please select an offer to view the details.</p>
         )}
       </div>
     </div>

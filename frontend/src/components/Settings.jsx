@@ -83,7 +83,7 @@ export default function Settings({ user }) {
             value={resumeText}
             onChange={(e) => setResumeText(e.target.value)} // Allow user to edit text
             placeholder='Resume text'
-            className='p-4 bg-slate-100 rounded-lg border border-slate-200 h-1/3'
+            className='p-4 bg-slate-100 rounded-lg border border-slate-200 h-full'
           />
         </div>
       </div>

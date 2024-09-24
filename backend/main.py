@@ -22,6 +22,7 @@ db = firestore.client()
 
 def get_page(url, config, retries=3, delay=1):
     """Fetch the page content from the given URL with retries."""
+    time.sleep(delay)
     for _ in range(retries):
         try:
             response = requests.get(url, headers=config['headers'], timeout=5)
@@ -34,7 +35,6 @@ def get_page(url, config, retries=3, delay=1):
             print("Timeout error")
         except Exception as e:
             print(f"An error occurred: {e}")
-    time.sleep(delay)
     return None
 
 def parse_jobs_from_page(config):
@@ -85,6 +85,9 @@ def parse_job_details(soup):
                        item.find('time', class_='job-search-card__listdate--new')
             date = date_tag['datetime'] if date_tag else ''
 
+            logo_img = parent_div.find('img', class_='artdeco-entity-image')
+            logo_url = logo_img['data-delayed-url'] if logo_img else ''
+
             job = {
                 'title': title,
                 'company': company.text.strip().replace('\n', ' ') if company else '',
@@ -92,6 +95,7 @@ def parse_job_details(soup):
                 'date': date,
                 'job_url': job_url,
                 'job_description': '',
+                'company_logo': logo_url, 
                 'applied': 0,
                 'hidden': 0,
                 'interview': 0,
@@ -107,7 +111,7 @@ def parse_job_description(desc_soup):
     """Extract and clean the job description from the given soup object."""
     if not desc_soup:
         return "Could not find Job Description"
-
+    
     div = desc_soup.find('div', class_='description__text description__text--rich')
     if not div:
         return "Could not find Job Description"
@@ -125,6 +129,7 @@ def parse_job_description(desc_soup):
     text = text.replace('Show less', '').replace('Show more', '')
 
     return text
+
 
 def get_job_description(job, config):
     """Fetch and parse the job description for a specific job."""
