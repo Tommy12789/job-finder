@@ -377,6 +377,8 @@ def generate_cover_letter():
         user_email = request.json.get("email")
         job_offer = request.json.get("jobOffer")
 
+        print(job_offer)
+
         if not user_email or not job_offer:
             return (
                 jsonify(
@@ -420,13 +422,15 @@ def generate_cover_letter():
 
         print(f"Cover letter generated: {cover_letter}")
 
-        user_ref = db.collection("users").document(user_email)
-
         if user_doc.exists:
             favorites = user_data.get("favorites", [])
+
+            # Mise à jour précise de l'offre correspondante
             for job in favorites:
-                if job.get("id") == job_offer.get("id"):
+                if job.get("job_url") == job_offer.get("job_url"):
+                    # Met à jour uniquement cette offre avec la nouvelle lettre de motivation
                     job["cover_letter"] = cover_letter
+                    break  # S'arrête dès que l'offre correspondante est trouvée
 
             user_ref.update({"favorites": favorites})
 
@@ -444,6 +448,7 @@ def generate_cover_letter():
 
     except Exception as e:
         print(f"Error generating cover letter: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/auth/register", methods=["POST"])

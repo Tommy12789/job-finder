@@ -176,6 +176,7 @@ function App() {
             user={user}
             favoriteJobOffers={favoriteJobOffers}
             handleFavoriteClick={handleFavoriteClick}
+            setFavoriteJobOffers={setFavoriteJobOffers}
           />
         );
       case 'settings':

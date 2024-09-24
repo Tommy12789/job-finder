@@ -2,12 +2,17 @@ import React from 'react';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { useState } from 'react';
-import { Tooltip, Modal, Box, Button } from '@mui/material';
+import { Tooltip, Box, Button } from '@mui/material';
 
-export default function Favorites({ favoriteJobOffers, handleFavoriteClick, user }) {
+export default function Favorites({
+  favoriteJobOffers,
+  handleFavoriteClick,
+  user,
+  setFavoriteJobOffers,
+}) {
   const [selectedOffer, setSelectedOffer] = useState(null);
-  const [coverLetter, setCoverLetter] = useState('');
-  const [openModal, setOpenModal] = useState(false);
+  const [descriptionTab, setDescriptionTab] = useState('description');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFavoritesClick = (jobOffer) => {
     handleFavoriteClick(jobOffer);
@@ -15,11 +20,11 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick, user
 
   const handleSelectOffer = (offer) => {
     setSelectedOffer(offer);
+    setDescriptionTab('description');
   };
 
-  const handleGenerateCoverLetter = async () => {
-    if (!selectedOffer) return;
-
+  const handleGenerateCoverLetter = async (jobOffer) => {
+    setIsLoading(true);
     try {
       const response = await fetch('http://127.0.0.1:5000/generate-cover-letter', {
         method: 'POST',
@@ -27,28 +32,45 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick, user
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: user.email, // Remplacez par l'email actuel de l'utilisateur
-          jobOffer: selectedOffer,
+          email: user.email, // Replace with the actual user's email
+          jobOffer: jobOffer,
         }),
       });
 
-      console.log(response);
-
       if (!response.ok) {
-        throw new Error('Erreur lors de la génération de la lettre de motivation');
+        throw new Error('Error generating cover letter');
       }
 
       const data = await response.json();
-      setCoverLetter(data.cover_letter);
-      setOpenModal(true); // Ouvrir le modal avec la lettre de motivation
+
+      // Mise à jour immédiate de l'état
+      setFavoriteJobOffers((prev) =>
+        prev.map((offer) =>
+          offer.title === jobOffer.title ? { ...offer, cover_letter: data.cover_letter } : offer
+        )
+      );
+
+      // Mise à jour immédiate de l'offre sélectionnée
+      setSelectedOffer((prevSelectedOffer) =>
+        prevSelectedOffer && prevSelectedOffer.title === jobOffer.title
+          ? { ...prevSelectedOffer, cover_letter: data.cover_letter }
+          : prevSelectedOffer
+      );
     } catch (error) {
-      console.error('Erreur :', error);
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDownloadPDF = () => {
+    if (!selectedOffer || !selectedOffer.cover_letter) {
+      console.error('No cover letter available to download');
+      return;
+    }
+
     const link = document.createElement('a');
-    const blob = new Blob([coverLetter], { type: 'application/pdf' });
+    const blob = new Blob([selectedOffer.cover_letter], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     link.href = url;
     link.download = 'cover_letter.pdf';
@@ -136,31 +158,6 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick, user
                 />
                 <div className='flex pr-20 row justify-between w-100%'>
                   <h2 className='text-2xl font-semibold text-slate-800'>{selectedOffer.title}</h2>
-                  <Tooltip
-                    title='Create cover letter'
-                    placement='right-start'
-                    componentsProps={{
-                      tooltip: {
-                        sx: {
-                          fontWeight: '400',
-                          bgcolor: '#f8fafc',
-                          color: '#0f172a',
-                          padding: '10px 10px',
-                          fontSize: '14px',
-                          borderRadius: '8px',
-                          border: 'solid #e2e8f0',
-                          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        },
-                      },
-                    }}
-                  >
-                    <button
-                      className='bg-slate-50 p-3 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
-                      onClick={handleGenerateCoverLetter}
-                    >
-                      <BorderColorIcon />
-                    </button>
-                  </Tooltip>
                 </div>
               </p>
               <p className='text-slate-700 mb-2'>
@@ -184,18 +181,76 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick, user
                 </a>
               </p>
             </div>
+            <div className='flex w-full p-3 justify-center gap-2 text-slate-700 font-medium'>
+              <div className='w-full flex p-3 gap-2 bg-slate-100 rounded-lg'>
+                <button
+                  className={`w-1/2 p-2 rounded-md hover:bg-slate-300 transition-all ease-in-out duration-300 ${
+                    descriptionTab === 'description' ? 'bg-slate-300 text-slate-900' : ''
+                  }`}
+                  onClick={() => setDescriptionTab('description')}
+                >
+                  Description
+                </button>
+                <button
+                  className={`w-1/2 p-2 rounded-md hover:bg-slate-300 transition-all ease-in-out duration-300 ${
+                    descriptionTab === 'coverLetter' ? 'bg-slate-300 text-slate-900' : ''
+                  }`}
+                  onClick={() => setDescriptionTab('coverLetter')}
+                >
+                  Cover Letter
+                </button>
+              </div>
+            </div>
             <p
-              className='text-slate-600 p-6 overflow-y-auto'
-              style={{ height: 'calc(100vh - 270px)' }}
+              className='text-slate-600 p-5 overflow-y-auto'
+              style={{ height: 'calc(100vh - 385px)' }}
             >
-              {selectedOffer && selectedOffer.job_description ? (
+              {descriptionTab === 'description' &&
+              selectedOffer &&
+              selectedOffer.job_description ? (
                 <span
                   dangerouslySetInnerHTML={{
                     __html: selectedOffer.job_description.replace(/\n/g, '<br />'),
                   }}
                 ></span>
+              ) : descriptionTab === 'coverLetter' && selectedOffer.cover_letter ? (
+                <textarea
+                  className='w-full h-full p-4 bg-slate-100 rounded-lg'
+                  defaultValue={selectedOffer.cover_letter}
+                ></textarea>
+              ) : descriptionTab === 'coverLetter' && !selectedOffer.cover_letter ? (
+                <div className='flex justify-center items-center h-full'>
+                  {isLoading ? (
+                    <div className='flex flex-1 items-center'>
+                      <svg
+                        aria-hidden='true'
+                        className='fill-slate-700 flex flex-1 items-center  w-24 h-24 text-slate-200 animate-spin'
+                        viewBox='0 0 100 101'
+                        fill='none'
+                        xmlns='http://www.w3.org/2000/svg'
+                      >
+                        <path
+                          d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                          fill='currentColor'
+                        />
+                        <path
+                          d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                          fill='currentFill'
+                        />
+                      </svg>
+                    </div>
+                  ) : (
+                    <button
+                      className='bg-slate-50 p-3 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
+                      onClick={() => handleGenerateCoverLetter(selectedOffer)}
+                      disabled={isLoading}
+                    >
+                      Generate Cover Letter
+                    </button>
+                  )}
+                </div>
               ) : (
-                'No description available'
+                'No content available'
               )}
             </p>
           </>
