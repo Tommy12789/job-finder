@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react'; // Importez useAuth0
+import { useAuth0 } from '@auth0/auth0-react';
 import JobSearchForm from './components/JobSearchForm';
 import JobOffers from './components/JobOffers';
 import LoginButton from './components/LoginButton';
@@ -13,25 +13,95 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { useEffect } from 'react';
 
 function App() {
   const [jobOffers, setJobOffers] = useState([]);
   const [favoriteJobOffers, setFavoriteJobOffers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated, user } = useAuth0();
   const [selectedSection, setSelectedSection] = useState('search');
+
+  async function fetchFavorites(email) {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/get-favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || 'Erreur lors de la récupération des favoris');
+      }
+
+      const data = await response.json();
+      setFavoriteJobOffers(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des favoris :', error);
+    }
+  }
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.email) {
+      fetchFavorites(user.email);
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.email) {
+      fetchFavorites(user.email);
+    }
+  }, [isAuthenticated, user]);
 
   const handleSidebarClick = (section) => {
     setSelectedSection(section);
   };
 
-  function handleFavoriteClick(jobOffer) {
-    if (favoriteJobOffers.some((fav) => fav.title === jobOffer.title)) {
-      setFavoriteJobOffers((prevFavoriteJobOffers) =>
-        prevFavoriteJobOffers.filter((fav) => fav.title !== jobOffer.title)
+  async function handleFavoriteClick(jobOffer) {
+    console.log(user);
+    if (!user || !user.email) {
+      console.error('Utilisateur non authentifié ou email manquant');
+      return;
+    }
+
+    const isFavorited = favoriteJobOffers.some((fav) => fav.title === jobOffer.title);
+
+    try {
+      const requestBody = {
+        jobOffer,
+        email: user.email,
+      };
+
+      const response = await fetch(
+        isFavorited
+          ? 'http://127.0.0.1:5000/remove-favorite'
+          : 'http://127.0.0.1:5000/add-favorite',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        }
       );
-    } else {
-      setFavoriteJobOffers((prevFavoriteJobOffers) => [...prevFavoriteJobOffers, jobOffer]);
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || 'Erreur lors de la mise à jour des favoris');
+      }
+
+      setFavoriteJobOffers((prevFavoriteJobOffers) =>
+        isFavorited
+          ? prevFavoriteJobOffers.filter((fav) => fav.title !== jobOffer.title)
+          : [...prevFavoriteJobOffers, jobOffer]
+      );
+
+      console.log('Mise à jour réussie des favoris dans le backend');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des favoris :', error);
     }
   }
 
