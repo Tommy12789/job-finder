@@ -6,10 +6,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
+import fitz
 
 app = Flask(__name__)
-CORS(app) 
-# Store the latest job offers globally
+CORS(app)
 latest_job_offers = []
 favorites = []
 
@@ -34,7 +34,7 @@ def get_page(url, config, retries=3, delay=1):
             print("Timeout error")
         except Exception as e:
             print(f"An error occurred: {e}")
-        time.sleep(delay)
+    time.sleep(delay)
     return None
 
 def parse_jobs_from_page(config):
@@ -172,7 +172,6 @@ def add_favorite():
         if not user_email or not job_offer:
             return jsonify({"error": "Données manquantes"}), 400
 
-        # Récupérer la référence de l'utilisateur dans Firestore
         user_ref = db.collection('users').document(user_email)
         user_doc = user_ref.get()
 
@@ -180,7 +179,6 @@ def add_favorite():
             user_data = user_doc.to_dict()
             favorites = user_data.get('favorites', [])
 
-            # Vérifier si l'offre existe déjà dans les favoris
             if job_offer not in favorites:
                 favorites.append(job_offer)
                 user_ref.update({'favorites': favorites})
@@ -216,6 +214,77 @@ def get_favorites():
     except Exception as e:
         print(f"Error retrieving favorites: {e}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/get-resume-text', methods=['POST'])
+def get_resume_text():
+    try:
+        user_email = request.json.get('email')
+
+        if not user_email:
+            return jsonify({"error": "Email est requis"}), 400
+
+        # Récupérer la référence de l'utilisateur dans Firestore
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            resume_text = user_data.get('resume_text', '')
+            return jsonify({"resume_text": resume_text}), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error retrieving resume text: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/resume-upload', methods=['POST'])
+def upload_resume():
+    try:
+        user_email = request.form.get('email')
+        resume = request.files.get('resume')
+
+        if not user_email or not resume:
+            return jsonify({"error": "Données manquantes"}), 400
+
+        pdf_text = extract_text_from_pdf(resume)
+        print(f"Resume text extracted: {pdf_text[:500]}...")  # Debugging output
+
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_ref.update({'resume_text': pdf_text})
+            return jsonify({"message": "CV téléchargé et profil mis à jour avec succès", "text": pdf_text}), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error uploading resume: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+def extract_text_from_pdf(pdf_file):
+    """Function to extract text from an uploaded PDF using PyMuPDF (fitz)."""
+    try:
+        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+        text = ""
+        
+        for page_num in range(doc.page_count):
+            page = doc.load_page(page_num)
+            text += page.get_text("text")
+        
+        doc.close()
+        print(f"Extracted text: {text[:500]}...")  # Print a snippet of the extracted text for debugging
+        return text if text.strip() else "No text found in the PDF."
+
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+        return "Error extracting text from the PDF."
+
+
+
 
 
 @app.route('/remove-favorite', methods=['POST'])

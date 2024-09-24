@@ -18,7 +18,6 @@ export default function Sidebar({ onSectionClick }) {
   return (
     <aside className='border-r h-screen flex flex-col justify-between items-center px-2 py-4 fill-current text-slate-600 border-slate-400'>
       <div className='items-center flex flex-col gap-3'>
-        {/* Bouton "Home" toujours actif avec fond noir */}
         <Tooltip
           title='Home'
           placement='right-start'

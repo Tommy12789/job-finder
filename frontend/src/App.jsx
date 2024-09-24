@@ -50,12 +50,6 @@ function App() {
     }
   }, [isAuthenticated, user]);
 
-  useEffect(() => {
-    if (isAuthenticated && user && user.email) {
-      fetchFavorites(user.email);
-    }
-  }, [isAuthenticated, user]);
-
   const handleSidebarClick = (section) => {
     setSelectedSection(section);
   };
@@ -176,7 +170,7 @@ function App() {
           />
         );
       case 'settings':
-        return <Settings />;
+        return <Settings user={user} />;
       default:
         return <Profile />;
     }
