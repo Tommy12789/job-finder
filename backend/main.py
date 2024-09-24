@@ -480,5 +480,55 @@ def register_user():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/update-cover-letter", methods=["POST"])
+def update_cover_letter():
+    try:
+        user_email = request.json.get("email")
+        job_offer = request.json.get("jobOffer")
+        cover_letter = request.json.get("coverLetter")
+
+        if not user_email or not job_offer or not cover_letter:
+            return (
+                jsonify(
+                    {
+                        "error": "Email, informations de l'offre d'emploi et lettre de motivation sont requis"
+                    }
+                ),
+                400,
+            )
+
+        user_ref = db.collection("users").document(user_email)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+        user_data = user_doc.to_dict()
+        favorites = user_data.get("favorites", [])
+
+        # Mise à jour précise de l'offre correspondante
+        for job in favorites:
+            if job.get("job_url") == job_offer.get("job_url"):
+                # Met à jour uniquement cette offre avec la nouvelle lettre de motivation
+                job["cover_letter"] = cover_letter
+                break  # S'arrête dès que l'offre correspondante est trouvée
+
+        user_ref.update({"favorites": favorites})
+
+        return (
+            jsonify(
+                {
+                    "message": "Lettre de motivation mise à jour avec succès",
+                    "cover_letter": cover_letter,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print(f"Error updating cover letter: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)

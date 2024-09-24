@@ -12,6 +12,7 @@ export default function Favorites({
 }) {
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [descriptionTab, setDescriptionTab] = useState('description');
+  const [textAreaText, setTextAreaText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFavoritesClick = (jobOffer) => {
@@ -21,6 +22,56 @@ export default function Favorites({
   const handleSelectOffer = (offer) => {
     setSelectedOffer(offer);
     setDescriptionTab('description');
+  };
+
+  const handleTextAreaChange = (e) => {
+    setTextAreaText(e.target.value);
+    console.log(e.target.value);
+  };
+
+  const handleUpdateCoverLetter = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:5000/update-cover-letter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          jobOffer: selectedOffer,
+          coverLetter: textAreaText,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error updating cover letter');
+      }
+
+      const data = await response.json();
+
+      // Mise à jour immédiate de l'état
+      setFavoriteJobOffers((prev) =>
+        prev.map((offer) =>
+          offer.title === selectedOffer.title
+            ? { ...offer, cover_letter: data.cover_letter }
+            : offer
+        )
+      );
+
+      // Mise à jour immédiate de l'offre sélectionnée
+      setSelectedOffer((prevSelectedOffer) =>
+        prevSelectedOffer && prevSelectedOffer.title === selectedOffer.title
+          ? { ...prevSelectedOffer, cover_letter: data.cover_letter }
+          : prevSelectedOffer
+      );
+
+      console.log('Cover letter updated successfully');
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGenerateCoverLetter = async (jobOffer) => {
@@ -201,7 +252,7 @@ export default function Favorites({
                 </button>
               </div>
             </div>
-            <p
+            <div
               className='text-slate-600 p-5 overflow-y-auto'
               style={{ height: 'calc(100vh - 385px)' }}
             >
@@ -214,10 +265,19 @@ export default function Favorites({
                   }}
                 ></span>
               ) : descriptionTab === 'coverLetter' && selectedOffer.cover_letter ? (
-                <textarea
-                  className='w-full h-full p-4 bg-slate-100 rounded-lg'
-                  defaultValue={selectedOffer.cover_letter}
-                ></textarea>
+                <div className='flex flex-col gap-3 h-full items-end'>
+                  <textarea
+                    className='w-full h-full p-4 bg-slate-100 rounded-lg'
+                    defaultValue={selectedOffer.cover_letter}
+                    onChange={handleTextAreaChange}
+                  ></textarea>
+                  <button
+                    className='px-4 py-2 bg-slate-50 border rounded-lg hover:bg-slate-200 transition-all ease-in-out duration-300 hover:text-slate-900 text-slate-700'
+                    onClick={() => handleUpdateCoverLetter(selectedOffer)}
+                  >
+                    Update
+                  </button>
+                </div>
               ) : descriptionTab === 'coverLetter' && !selectedOffer.cover_letter ? (
                 <div className='flex justify-center items-center h-full'>
                   {isLoading ? (
@@ -252,7 +312,7 @@ export default function Favorites({
               ) : (
                 'No content available'
               )}
-            </p>
+            </div>
           </>
         ) : (
           <p className='flex items-center justify-center text-slate-700 text-xl h-full w-full '>
