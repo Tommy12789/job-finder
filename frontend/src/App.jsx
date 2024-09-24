@@ -173,6 +173,7 @@ function App() {
       case 'favorites':
         return (
           <Favorites
+            user={user}
             favoriteJobOffers={favoriteJobOffers}
             handleFavoriteClick={handleFavoriteClick}
           />

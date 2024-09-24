@@ -7,6 +7,11 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 import fitz
+from openai import OpenAI
+
+client = OpenAI(api_key="")
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +24,8 @@ firebase_admin.initialize_app(cred)
 
 # Initialize Firestore DB
 db = firestore.client()
+
+
 
 def get_page(url, config, retries=3, delay=1):
     """Fetch the page content from the given URL with retries."""
@@ -100,6 +107,7 @@ def parse_job_details(soup):
                 'job_url': job_url,
                 'job_description': '',
                 'company_logo': logo_url, 
+                'cover_letter': '',
                 'applied': 0,
                 'hidden': 0,
                 'interview': 0,
@@ -119,7 +127,7 @@ def parse_job_description(desc_soup):
     div = desc_soup.find('div', class_='description__text description__text--rich')
     if not div:
         return "Could not find Job Description"
-    
+
     # Clean and format the job description
     for element in div.find_all(['span', 'a']):
         element.decompose()
@@ -171,7 +179,7 @@ def get_latest_offers():
         return jsonify(latest_job_offers), 200
     else:
         return jsonify({"message": "No job offers available"}), 404
-    
+
 @app.route('/add-favorite', methods=['POST'])
 def add_favorite():
     try:
@@ -200,7 +208,7 @@ def add_favorite():
     except Exception as e:
         print(f"Error adding favorite: {e}")
         return jsonify({"error": str(e)}), 500
-    
+
 @app.route('/get-favorites', methods=['POST'])
 def get_favorites():
     try:
@@ -279,11 +287,11 @@ def extract_text_from_pdf(pdf_file):
     try:
         doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
         text = ""
-        
+
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
             text += page.get_text("text")
-        
+
         doc.close()
         print(f"Extracted text: {text[:500]}...")  # Print a snippet of the extracted text for debugging
         return text if text.strip() else "No text found in the PDF."
@@ -291,10 +299,6 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         print(f"Error extracting text from PDF: {e}")
         return "Error extracting text from the PDF."
-
-
-
-
 
 @app.route('/remove-favorite', methods=['POST'])
 def remove_favorite():
@@ -325,7 +329,66 @@ def remove_favorite():
         print(f"Error removing favorite: {e}")
         return jsonify({"error": str(e)}), 500
 
-    
+@app.route('/generate-cover-letter', methods=['POST'])
+def generate_cover_letter():
+    try:
+        user_email = request.json.get('email')
+        job_offer = request.json.get('jobOffer')  # Contient les détails de l'offre d'emploi
+
+        if not user_email or not job_offer:
+            return jsonify({"error": "Email et informations de l'offre d'emploi sont requis"}), 400
+
+        # Récupérer le texte du CV de l'utilisateur depuis Firestore
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+        user_data = user_doc.to_dict()
+        resume_text = user_data.get('resume_text', '')
+
+        if not resume_text:
+            return jsonify({"error": "CV non disponible"}), 400
+
+        # Générer la lettre de motivation avec OpenAI
+        prompt = (
+            f"Créer une lettre de motivation pour un poste intitulé '{job_offer['title']}' chez "
+            f"'{job_offer['company']}' basé à '{job_offer['location']}'. "
+            f"Voici la description de l'offre : {job_offer['job_description']}. "
+            f"Le texte du CV du candidat est le suivant : {resume_text}. "
+            f"Créer une lettre de motivation professionnelle qui met en valeur les compétences et l'expérience."
+        )
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ]
+        )
+
+        cover_letter = response.choices[0].message.content
+
+        print(f"Cover letter generated: {cover_letter}")
+
+        user_ref = db.collection('users').document(user_email)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_ref.update({'favorites.cover_letter': cover_letter})
+            return jsonify({"message": "Lettre de motivation générée et enregistrée avec succès", "cover_letter": cover_letter}), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    except Exception as e:
+        print(f"Error generating cover letter: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/auth/register', methods=['POST'])
 def register_user():
     try:
@@ -355,6 +418,7 @@ def register_user():
     except Exception as e:
         print(f"Error registering user: {e}")
         return jsonify({"error": str(e)}), 500
-    
+
+
 if __name__ == '__main__':
     app.run(debug=True)
