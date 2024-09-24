@@ -400,11 +400,11 @@ def generate_cover_letter():
             return jsonify({"error": "CV non disponible"}), 400
 
         prompt = (
-            f"Créer une lettre de motivation pour un poste intitulé '{job_offer['title']}' chez "
-            f"'{job_offer['company']}' basé à '{job_offer['location']}'. "
-            f"Voici la description de l'offre : {job_offer['job_description']}. "
-            f"Le texte du CV du candidat est le suivant : {resume_text}. "
-            f"Créer une lettre de motivation professionnelle qui met en valeur les compétences et l'expérience."
+            f"Create a cover letter for a position titled '{job_offer['title']}' at "
+            f"'{job_offer['company']}' based in '{job_offer['location']}'. "
+            f"Here is the job description: {job_offer['job_description']}. "
+            f"The candidate's resume text is as follows: {resume_text}. "
+            f"Create a professional cover letter that highlights the skills and experience."
         )
 
         response = client.chat.completions.create(
