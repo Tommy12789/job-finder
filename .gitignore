@@ -1,3 +1,4 @@
 venv
 jobfinder-5739c-firebase-adminsdk-i3z04-d82584d2c9.json
 __pycache__/
+.env
