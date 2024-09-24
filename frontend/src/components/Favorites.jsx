@@ -1,10 +1,13 @@
 import React from 'react';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { useState } from 'react';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip, Modal, Box, Button } from '@mui/material';
 
 export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
   const [selectedOffer, setSelectedOffer] = useState(null);
+  const [coverLetter, setCoverLetter] = useState('');
+  const [openModal, setOpenModal] = useState(false);
 
   const handleFavoritesClick = (jobOffer) => {
     handleFavoriteClick(jobOffer);
@@ -12,6 +15,46 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
 
   const handleSelectOffer = (offer) => {
     setSelectedOffer(offer);
+  };
+
+  const handleGenerateCoverLetter = async () => {
+    if (!selectedOffer) return;
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/generate-cover-letter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'marchandkyrian83@gmail.com',  // Remplacez par l'email actuel de l'utilisateur
+          jobOffer: selectedOffer,
+        }),
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la génération de la lettre de motivation');
+      }
+
+      const data = await response.json();
+      setCoverLetter(data.cover_letter);
+      setOpenModal(true);  // Ouvrir le modal avec la lettre de motivation
+    } catch (error) {
+      console.error('Erreur :', error);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    const link = document.createElement('a');
+    const blob = new Blob([coverLetter], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = 'cover_letter.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -91,7 +134,32 @@ export default function Favorites({ favoriteJobOffers, handleFavoriteClick }) {
                   src={selectedOffer.company_logo}
                   alt=''
                 />
-                <h2 className='text-2xl font-semibold text-slate-800'>{selectedOffer.title}</h2>
+                <div className='flex pr-20 row justify-between w-100%'>
+              <h2 className='text-2xl font-semibold text-slate-800'>{selectedOffer.title}</h2>
+              <Tooltip
+                title='Create cover letter'
+                placement='right-start'
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      fontWeight: '400',
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      padding: '10px 10px',
+                      fontSize: '14px',
+                      borderRadius: '8px',
+                      border: 'solid #e2e8f0',
+                      boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    },
+                  },
+                }}
+              >
+                <button className='bg-slate-50 p-3 rounded-lg border text-slate-600 hover:bg-slate-200 transition-all ease-in-out duration-300'
+                onClick={handleGenerateCoverLetter}>
+                  <BorderColorIcon />
+                </button>
+              </Tooltip>
+            </div>
               </p>
               <p className='text-slate-700 mb-2'>
                 <strong>Company:</strong> {selectedOffer.company}
