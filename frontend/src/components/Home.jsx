@@ -1,4 +1,10 @@
+import React from 'react';
+import LoginButton from './LoginButton';
+import { useAuth0 } from '@auth0/auth0-react';
+
 export default function Home({ onSectionClick }) {
+  const { isAuthenticated } = useAuth0();
+
   return (
     <div className='flex flex-col p-10 gap-8 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-lg justify-center h-full my-52'>
       <h2 className='text-3xl font-semibold text-gray-800'>Job Finder</h2>
@@ -30,12 +36,19 @@ export default function Home({ onSectionClick }) {
       <p className='text-lg text-gray-700 mt-6'>
         Get started now and take control of your job search!
       </p>
-      <button
-        onClick={() => onSectionClick('search')}
-        className='bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300'
-      >
-        Get Started
-      </button>
+      {isAuthenticated ? (
+        <button
+          onClick={() => onSectionClick('search')}
+          className='bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300'
+        >
+          Get Started
+        </button>
+      ) : (
+        <LoginButton
+          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          buttonText="Get login !"
+        />
+      )}
     </div>
   );
 }
