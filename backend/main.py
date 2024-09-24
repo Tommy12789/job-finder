@@ -9,7 +9,7 @@ from firebase_admin import credentials, firestore
 import fitz
 from openai import OpenAI
 
-client = OpenAI()
+client = OpenAI(api_key="")
 
 
 
