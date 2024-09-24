@@ -6,6 +6,7 @@ import LoginButton from './components/LoginButton';
 import LogoutButton from './components/LogoutButton';
 import Profile from './components/Profile';
 import Sidebar from './components/Sidebar';
+import Home from './components/Home';
 import Header from './components/Header';
 import Settings from './components/Settings';
 import Favorites from './components/Favorites';
@@ -20,7 +21,7 @@ function App() {
   const [favoriteJobOffers, setFavoriteJobOffers] = useState([]);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated, user } = useAuth0();
-  const [selectedSection, setSelectedSection] = useState('search');
+  const [selectedSection, setSelectedSection] = useState('home');
 
   async function fetchFavorites(email) {
     try {
@@ -178,6 +179,8 @@ function App() {
         );
       case 'settings':
         return <Settings user={user} />;
+      case 'home':
+        return <Home onSectionClick={handleSidebarClick} />;
       default:
         return <Profile />;
     }

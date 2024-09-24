@@ -22,12 +22,16 @@ db = firestore.client()
 
 def get_page(url, config, retries=3, delay=1):
     """Fetch the page content from the given URL with retries."""
-    time.sleep(delay)
-    for _ in range(retries):
+    for attempt in range(retries):
+        time.sleep(delay)  # Delay before making the request
         try:
             response = requests.get(url, headers=config['headers'], timeout=5)
             if response.status_code == 200:
+                print(f"Page retrieved successfully: {url}")
                 return BeautifulSoup(response.content, 'html.parser')
+            elif response.status_code == 429:
+                print("Rate limit exceeded. Retrying after delay...")
+                time.sleep(5)  # Wait longer when hitting a rate limit
             else:
                 print(f"Failed to retrieve page. Status code: {response.status_code}")
                 return None
@@ -35,6 +39,7 @@ def get_page(url, config, retries=3, delay=1):
             print("Timeout error")
         except Exception as e:
             print(f"An error occurred: {e}")
+    print(f"Failed to retrieve page: {url}")
     return None
 
 def parse_jobs_from_page(config):
@@ -48,14 +53,13 @@ def parse_jobs_from_page(config):
             # Build the URL for scraping
             url = (f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
                    f"keywords={keywords}&location={location}&f_TPR=&f_WT={query['experience_level']}"
-                   f"&geoId=&f_TPR={config['timespan']}&start={25 * page_num}")
+                   f"&geoId=&f_TPR={config['timespan']}&start={10 * page_num}")
             
             soup = get_page(url, config)
             if soup:
                 jobs = parse_job_details(soup)
                 all_job_offers.extend(jobs)
-                print(f"Finished scraping page: {url}")
-            time.sleep(1)
+            time.sleep(5)
 
     print(f"Total job cards scraped: {len(all_job_offers)}")
     return all_job_offers

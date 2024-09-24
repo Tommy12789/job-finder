@@ -22,7 +22,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
     <div className='flex flex-1'>
       {/* Left panel - Job offers list */}
       <div className='w-2/5 border-slate-300 flex flex-col'>
-        <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
+        <h2 className='p-4 text-xl font-semibold  text-center border-b'>
           {jobOffers.length > 0
             ? `${jobOffers.length} job offer${jobOffers.length > 1 ? 's' : ''} found`
             : 'No job offers found'}
@@ -82,39 +82,41 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
         </ul>
       </div>
 
-      <div className='w-3/5 p-4 h-full overflow-y-auto'>
+      <div className='flex flex-1 flex-col w-3/5 h-full overflow-y-auto '>
         {selectedOffer ? (
-          <div>
-            <p className='flex gap-4 items-center mb-4'>
-              <img
-                className='rounded-full border w-16 h-16'
-                src={selectedOffer.company_logo}
-                alt=''
-              />
-              <h2 className='text-2xl font-semibold text-slate-800 '>{selectedOffer.title}</h2>
-            </p>
-            <p className='text-slate-700 mb-2'>
-              <strong>Company:</strong> {selectedOffer.company}
-            </p>
-            <p className='text-slate-700 mb-2'>
-              <strong>Location:</strong> {selectedOffer.location}
-            </p>
-            <p className='text-slate-700 mb-2'>
-              <strong>Date:</strong> {selectedOffer.date}
-            </p>
-            <p className='text-slate-700 mb-2'>
-              <strong>Job URL:</strong>{' '}
-              <a
-                href={selectedOffer.job_url}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-600 hover:text-blue-800'
-              >
-                {selectedOffer.job_url}
-              </a>
-            </p>
+          <>
+            <div className='border-b p-4'>
+              <p className='flex gap-4 items-center mb-4'>
+                <img
+                  className='rounded-full border w-16 h-16'
+                  src={selectedOffer.company_logo}
+                  alt=''
+                />
+                <h2 className='text-2xl font-semibold text-slate-800 '>{selectedOffer.title}</h2>
+              </p>
+              <p className='text-slate-700 mb-2'>
+                <strong>Company:</strong> {selectedOffer.company}
+              </p>
+              <p className='text-slate-700 mb-2'>
+                <strong>Location:</strong> {selectedOffer.location}
+              </p>
+              <p className='text-slate-700 mb-2'>
+                <strong>Date:</strong> {selectedOffer.date}
+              </p>
+              <p className='text-slate-700 mb-2'>
+                <strong>Job URL:</strong>{' '}
+                <a
+                  href={selectedOffer.job_url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-600 hover:text-blue-800'
+                >
+                  {selectedOffer.job_url}
+                </a>
+              </p>
+            </div>
             <p
-              className='text-slate-600 mt-4 p-4 overflow-y-auto'
+              className='text-slate-600 p-6 overflow-y-auto'
               style={{ height: 'calc(100vh - 375px)' }}
             >
               {selectedOffer && selectedOffer.job_description ? (
@@ -127,9 +129,11 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
                 'No description available'
               )}
             </p>
-          </div>
+          </>
         ) : (
-          <p className='text-slate-700'>Please select an offer to view the details.</p>
+          <p className='flex items-center justify-center text-slate-700 text-xl h-full w-full '>
+            Please select an offer to view the details.
+          </p>
         )}
       </div>
     </div>
