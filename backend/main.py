@@ -529,6 +529,37 @@ def update_cover_letter():
         print(f"Error updating cover letter: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/update-user-data', methods=['POST'])
+def update_user_data():
+    data = request.get_json()
+    email = data.get('email')
+    first_name = data.get('firstName')
+    last_name = data.get('lastName')
+    phone_number = data.get('phoneNumber')
+    address = data.get('address')
+    zip_code = data.get('zip')
+    city = data.get('city')
+    country = data.get('country')
+
+    user_ref = db.collection('users').document(email)
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+        user_ref.update({
+            'first_name': first_name,
+            'last_name': last_name,
+            'phone_number': phone_number,
+            'address': address,
+            'zip_code': zip_code,
+            'city': city,
+            'country': country
+        })
+        return jsonify({'message': 'User data updated successfully'}), 200
+    else:
+        return jsonify({'error': 'User not found'}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
