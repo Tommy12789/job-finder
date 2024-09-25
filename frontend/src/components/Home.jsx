@@ -2,7 +2,7 @@ import React from 'react';
 import LoginButton from './LoginButton';
 import { useAuth0 } from '@auth0/auth0-react';
 
-export default function Home({ onSectionClick }) {
+export default function Home({ handleButtonClick }) {
   const { isAuthenticated } = useAuth0();
 
   return (
@@ -44,7 +44,7 @@ export default function Home({ onSectionClick }) {
         </p>
         {isAuthenticated ? (
           <button
-            onClick={() => onSectionClick('search')}
+            onClick={() => handleButtonClick('search')}
             className='bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300'
           >
             Get Started

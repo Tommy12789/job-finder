@@ -22,6 +22,12 @@ function App() {
   const [loading, setLoading] = useState(false);
   const { isAuthenticated, user } = useAuth0();
   const [selectedSection, setSelectedSection] = useState('home');
+  const [activeButton, setActiveButton] = useState('home');
+
+  const handleButtonClick = (section) => {
+    setActiveButton(section);
+    handleSidebarClick(section);
+  };
 
   async function fetchFavorites(email) {
     try {
@@ -175,7 +181,7 @@ function App() {
       case 'upload':
         return <Settings user={user} />;
       case 'home':
-        return <Home onSectionClick={handleSidebarClick} />;
+        return <Home handleButtonClick={handleButtonClick} />;
       default:
         return <Profile />;
     }
@@ -183,10 +189,13 @@ function App() {
 
   return (
     <div className='flex h-screen w-screen overflow-hidden'>
-      <Sidebar onSectionClick={handleSidebarClick} />
+      <Sidebar
+        activeButton={activeButton}
+        handleButtonClick={handleButtonClick}
+      />
       <div className='flex flex-1 flex-col space-y max-h-screen'>
         <Header
-          onSectionClick={handleSidebarClick}
+          handleButtonClick={handleButtonClick}
           isAuthenticated={isAuthenticated}
           selectedSection={selectedSection}
         />

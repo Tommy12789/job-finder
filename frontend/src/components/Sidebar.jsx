@@ -6,18 +6,13 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import Tooltip from '@mui/material/Tooltip';
 import { useAuth0 } from '@auth0/auth0-react';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import logo from '../../public/white_logo.svg';
+import logo from '/white_logo.svg';
 
-export default function Sidebar({ onSectionClick }) {
+export default function Sidebar({ activeButton, handleButtonClick }) {
   // État pour garder la trace du bouton actif
-  const [activeButton, setActiveButton] = useState('home');
   const { isAuthenticated } = useAuth0();
 
   // Fonction pour gérer le clic et changer le bouton actif
-  const handleButtonClick = (section) => {
-    setActiveButton(section);
-    onSectionClick(section);
-  };
 
   console.log(isAuthenticated);
 
@@ -53,7 +48,7 @@ export default function Sidebar({ onSectionClick }) {
           <button
             onClick={() => handleButtonClick('home')}
             className={`transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center ${
-              activeButton === 'search'
+              activeButton === 'home'
                 ? 'bg-slate-200 text-slate-900'
                 : 'hover:bg-slate-200 hover:text-slate-900'
             }`}
