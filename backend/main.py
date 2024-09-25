@@ -392,6 +392,13 @@ def generate_cover_letter():
             return jsonify({"error": "Utilisateur non trouvé"}), 404
 
         user_data = user_doc.to_dict()
+        phone = user_data.get("phone_number", "")
+        address = user_data.get("address", "")
+        city = user_data.get("city", "")
+        zip_code = user_data.get("zip_code", "")
+        country = user_data.get("country", "")
+        firstname = user_data.get("prenom", "")
+        lastname = user_data.get("nom", "")
         resume_text = user_data.get("resume_text", "")
 
         if not resume_text:
@@ -402,13 +409,21 @@ def generate_cover_letter():
             f"'{job_offer['company']}' based in '{job_offer['location']}'. "
             f"Here is the job description: {job_offer['job_description']}. "
             f"The candidate's resume text is as follows: {resume_text}. "
+            f"The candidate personal information is as follows: {firstname}, {lastname}. "
+            f"{address}, {city}, {zip_code}, {country}. "
             f"Create a professional cover letter that highlights the skills and experience."
+            f"Do not include information that you do not have (no '[' or ']' and '*' and links). I do not want bold text and do not include the company address."
+            f"On the top left, I want my personnal information to be included at the top the cover letter ('firstname lastname', 'address, zipcode', 'city, country', number, mail)."
+            f"Then on the right write 'company name', 'city, country'"
+            f"Then write the subject of the letter 'Application for the position of 'job title' at 'company name'"
+            f"Then i want to write 'Dear company name hiring team' and then the body of the letter."
+            f" At the end just sign with my name."
         )
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "As an HR professional, I need your assistance in crafting an exceptional cover letter"},
                 {
                     "role": "user",
                     "content": prompt,
