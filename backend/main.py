@@ -553,13 +553,7 @@ def update_user_data():
         return (
             jsonify(
                 {
-                    "prenom": first_name,
-                    "nom": last_name,
-                    "phone_number": phone_number,
-                    "address": address,
-                    "zip_code": zip_code,
-                    "city": city,
-                    "country": country
+                    "prenom": "Successfully updated user data for user with email: " + email
                 }
             ),
             200,

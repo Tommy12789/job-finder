@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Settings({ user, handleUserInformationsChange, userInformations}) {
+export default function Settings({ user }) {
   const [resumeText, setResumeText] = useState('Le texte de votre CV apparaîtra ici.');
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     phoneNumber: '',
-      address: '',
-      zip: '',
-      city: '',
-      country: '',
+    address: '',
+    zip: '',
+    city: '',
+    country: '',
   });
 
   // Récupérer les informations de l'utilisateur au montage du composant
@@ -66,9 +66,6 @@ export default function Settings({ user, handleUserInformationsChange, userInfor
       }
 
       const data = await response.json();
-      for (const [key, value] of Object.entries(data)) {
-        handleUserInformationsChange(key, value);
-      }
 
       console.log('User data updated successfully:', data);
     } catch (error) {
@@ -135,90 +132,115 @@ export default function Settings({ user, handleUserInformationsChange, userInfor
   };
 
   return (
-    <div className='flex row' style={{ height: 'calc(100vh - 40px)' }}>
+    <div
+      className='flex row'
+      style={{ height: 'calc(100vh - 40px)' }}
+    >
       <div className='bg-slate-100 w-full h-100 pt-10 pl-10 pb-10 flex'>
         <div className='bg-slate-50 w-full h-max mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
-          <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'> Personnal informations </h2>
+          <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'>
+            {' '}
+            Personnal informations{' '}
+          </h2>
           <div className='flex flex-1 flex-col p-6 gap-3'>
-              <div className='flex gap-3'>
-                <input
-                  placeholder='First name'
-                  type='text'
-                  name='firstName'
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                />
-                <input
-                  placeholder='Last name'
-                  type='text'
-                  name='lastName'
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                  />
-              </div>
+            <div className='flex gap-3'>
               <input
-                placeholder='Phone number'
+                placeholder='First name'
                 type='text'
-                name='phoneNumber'
-                value={formData.phoneNumber}
+                name='firstName'
+                value={formData.firstName}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                />
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                  !isEditing ? 'cursor-not-allowed' : ''
+                }`}
+              />
               <input
-                placeholder='Address'
+                placeholder='Last name'
                 type='text'
-                name='address'
-                value={formData.address}
+                name='lastName'
+                value={formData.lastName}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                />
-              <input
-                placeholder='Zip code'
-                type='text'
-                name='zip'
-                value={formData.zip}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                />
-              <div className='flex gap-3'>
-                <input
-                  placeholder='City'
-                  type='text'
-                  name='city'
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                  />
-                <input
-                  placeholder='Country'
-                  type='text'
-                  name='country'
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                  />
-              </div>
-              <button
-                onClick={toggleEdit}
-                className={`py-2 px-4 rounded-lg ${isEditing ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}
-              >
-                {isEditing ? 'Save' : 'Edit'}
-              </button>
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                  !isEditing ? 'cursor-not-allowed' : ''
+                }`}
+              />
             </div>
+            <input
+              placeholder='Phone number'
+              type='text'
+              name='phoneNumber'
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                !isEditing ? 'cursor-not-allowed' : ''
+              }`}
+            />
+            <input
+              placeholder='Address'
+              type='text'
+              name='address'
+              value={formData.address}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                !isEditing ? 'cursor-not-allowed' : ''
+              }`}
+            />
+            <input
+              placeholder='Zip code'
+              type='text'
+              name='zip'
+              value={formData.zip}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                !isEditing ? 'cursor-not-allowed' : ''
+              }`}
+            />
+            <div className='flex gap-3'>
+              <input
+                placeholder='City'
+                type='text'
+                name='city'
+                value={formData.city}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                  !isEditing ? 'cursor-not-allowed' : ''
+                }`}
+              />
+              <input
+                placeholder='Country'
+                type='text'
+                name='country'
+                value={formData.country}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                  !isEditing ? 'cursor-not-allowed' : ''
+                }`}
+              />
+            </div>
+            <button
+              onClick={toggleEdit}
+              className={`py-2 px-4 rounded-lg ${
+                isEditing ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
+              }`}
+            >
+              {isEditing ? 'Save' : 'Edit'}
+            </button>
+          </div>
         </div>
       </div>
       <div className='bg-slate-100 h-full w-full pr-10 pt-10 pb-10 flex'>
         <div className='bg-slate-50 w-full h-full mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
-          <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'> Document upload </h2>
+          <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'>
+            {' '}
+            Document upload{' '}
+          </h2>
           <div className='flex flex-1 flex-col p-6 gap-3'>
             <label
               htmlFor='file'
@@ -251,4 +273,3 @@ export default function Settings({ user, handleUserInformationsChange, userInfor
     </div>
   );
 }
-
