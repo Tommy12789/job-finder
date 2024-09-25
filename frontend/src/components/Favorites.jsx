@@ -259,11 +259,11 @@ export default function Favorites({
                 <p
                   className={`absolute bottom-4 right-4 p-2 rounded-lg border text-slate-600 ${
                     offer.status === 'applied'
-                      ? 'border-yellow-300 text-yellow-700'
+                      ? 'border-yellow-300 text-yellow-800'
                       : offer.status === 'interview'
-                      ? 'border-green-300 text-green-700'
+                      ? 'border-green-300 text-green-800'
                       : offer.status === 'rejected'
-                      ? 'border-red-300 text-red-700'
+                      ? 'border-red-300 text-red-800'
                       : ''
                   }
                     ${
