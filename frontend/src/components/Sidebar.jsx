@@ -6,6 +6,7 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import Tooltip from '@mui/material/Tooltip';
 import { useAuth0 } from '@auth0/auth0-react';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import logo from '../../public/white_logo.svg';
 
 export default function Sidebar({ onSectionClick }) {
   // État pour garder la trace du bouton actif
@@ -23,6 +24,14 @@ export default function Sidebar({ onSectionClick }) {
   return (
     <aside className='border-r h-screen flex flex-col justify-between items-center px-2 py-4 fill-current text-slate-600 border-slate-400'>
       <div className='items-center flex flex-col gap-3'>
+        <div className='rounded-full bg-slate-50 border border-slate-900  text-slate-50 fill-current'>
+          <img
+            className='w-8 h-8 rounded-full '
+            src={logo}
+            alt=''
+          />
+        </div>
+
         <Tooltip
           title='Home'
           placement='right-start'
@@ -43,7 +52,11 @@ export default function Sidebar({ onSectionClick }) {
         >
           <button
             onClick={() => handleButtonClick('home')}
-            className='text-slate-200 transition-colors duration-300 ease-in-out rounded-full flex items-center bg-slate-900 p-2'
+            className={`transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center ${
+              activeButton === 'search'
+                ? 'bg-slate-200 text-slate-900'
+                : 'hover:bg-slate-200 hover:text-slate-900'
+            }`}
           >
             <HomeIcon fontSize='small' />
           </button>
