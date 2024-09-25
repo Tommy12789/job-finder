@@ -142,91 +142,117 @@ export default function Settings({ user }) {
             {' '}
             Personnal informations{' '}
           </h2>
-          <div className='flex flex-1 flex-col p-6 gap-3'>
-            <div className='flex gap-3'>
-              <input
-                placeholder='First name'
-                type='text'
-                name='firstName'
-                value={formData.firstName}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
-                  !isEditing ? 'cursor-not-allowed' : ''
-                }`}
-              />
-              <input
-                placeholder='Last name'
-                type='text'
-                name='lastName'
-                value={formData.lastName}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
-                  !isEditing ? 'cursor-not-allowed' : ''
-                }`}
-              />
+          <div className='flex flex-1 flex-col p-6 gap-6'>
+            <div className='flex gap-12'>
+              <p className='w-1/2 flex flex-col gap-2'>
+                <label
+                  className='text-md '
+                  htmlFor='firstName'
+                >
+                  Firstname
+                </label>
+                <input
+                  placeholder='First name'
+                  type='text'
+                  name='firstName'
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={`p-2 w-full bg-slate-100 rounded-lg border border-slate-200 ${
+                    !isEditing ? 'cursor-not-allowed' : ''
+                  }`}
+                />
+              </p>
+              <p className='w-1/2 flex flex-col gap-2'>
+                <label htmlFor='lastName'>Lastname</label>
+                <input
+                  placeholder='Last name'
+                  type='text'
+                  name='lastName'
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                    !isEditing ? 'cursor-not-allowed' : ''
+                  }`}
+                />
+              </p>
             </div>
-            <input
-              placeholder='Phone number'
-              type='text'
-              name='phoneNumber'
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
-                !isEditing ? 'cursor-not-allowed' : ''
-              }`}
-            />
-            <input
-              placeholder='Address'
-              type='text'
-              name='address'
-              value={formData.address}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
-                !isEditing ? 'cursor-not-allowed' : ''
-              }`}
-            />
-            <input
-              placeholder='Zip code'
-              type='text'
-              name='zip'
-              value={formData.zip}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
-                !isEditing ? 'cursor-not-allowed' : ''
-              }`}
-            />
-            <div className='flex gap-3'>
+            <p className='flex flex-col gap-2'>
+              <label htmlFor='phoneNumber'>Phone Number</label>
               <input
-                placeholder='City'
+                placeholder='Phone number'
                 type='text'
-                name='city'
-                value={formData.city}
+                name='phoneNumber'
+                value={formData.phoneNumber}
                 onChange={handleInputChange}
                 disabled={!isEditing}
                 className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
                   !isEditing ? 'cursor-not-allowed' : ''
                 }`}
               />
+            </p>
+            <p className='flex flex-col gap-2'>
+              <label htmlFor='address'>Address</label>
               <input
-                placeholder='Country'
+                placeholder='Address'
                 type='text'
-                name='country'
-                value={formData.country}
+                name='address'
+                value={formData.address}
                 onChange={handleInputChange}
                 disabled={!isEditing}
                 className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
                   !isEditing ? 'cursor-not-allowed' : ''
                 }`}
               />
+            </p>
+            <p className='flex flex-col gap-2'>
+              <label htmlFor='address'>Zip Code</label>
+              <input
+                placeholder='Zip code'
+                type='text'
+                name='zip'
+                value={formData.zip}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                  !isEditing ? 'cursor-not-allowed' : ''
+                }`}
+              />
+            </p>
+            <div className='flex gap-12'>
+              <p className='flex flex-col gap-2 w-1/2'>
+                <label htmlFor='address'>City</label>
+                <input
+                  placeholder='City'
+                  type='text'
+                  name='city'
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                    !isEditing ? 'cursor-not-allowed' : ''
+                  }`}
+                />
+              </p>
+              <p className='flex flex-col gap-2 w-1/2'>
+                <label htmlFor='address'>Country</label>
+                <input
+                  placeholder='Country'
+                  type='text'
+                  name='country'
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${
+                    !isEditing ? 'cursor-not-allowed' : ''
+                  }`}
+                />
+              </p>
             </div>
             <button
               onClick={toggleEdit}
-              className={`py-2 px-4 rounded-lg ${
+              className={`py-2 mt-5 px-4 rounded-lg ${
                 isEditing ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
               }`}
             >
