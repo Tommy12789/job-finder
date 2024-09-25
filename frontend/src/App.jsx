@@ -172,7 +172,7 @@ function App() {
             setFavoriteJobOffers={setFavoriteJobOffers}
           />
         );
-      case 'settings':
+      case 'upload':
         return <Settings user={user} />;
       case 'home':
         return <Home onSectionClick={handleSidebarClick} />;

@@ -115,10 +115,7 @@ def parse_job_details(soup):
                 "job_description": "",
                 "company_logo": logo_url,
                 "cover_letter": "",
-                "applied": 0,
-                "hidden": 0,
-                "interview": 0,
-                "rejected": 0,
+                "status": "",
             }
             joblist.append(job)
         except Exception as e:
@@ -358,7 +355,7 @@ def remove_favorite():
 
             # Vérifier si l'offre est dans les favoris
             updated_favorites = [
-                fav for fav in favorites if fav["title"] != job_offer["title"]
+                fav for fav in favorites if fav["job_url"] != job_offer["job_url"]
             ]
             user_ref.update({"favorites": updated_favorites})
 
@@ -377,7 +374,7 @@ def generate_cover_letter():
         user_email = request.json.get("email")
         job_offer = request.json.get("jobOffer")
 
-        print(job_offer)
+        print(user_email)
 
         if not user_email or not job_offer:
             return (
@@ -389,6 +386,8 @@ def generate_cover_letter():
 
         user_ref = db.collection("users").document(user_email)
         user_doc = user_ref.get()
+
+        print("test")
 
         if not user_doc.exists:
             return jsonify({"error": "Utilisateur non trouvé"}), 404
@@ -419,8 +418,6 @@ def generate_cover_letter():
         )
 
         cover_letter = response.choices[0].message.content
-
-        print(f"Cover letter generated: {cover_letter}")
 
         if user_doc.exists:
             favorites = user_data.get("favorites", [])
@@ -527,6 +524,61 @@ def update_cover_letter():
 
     except Exception as e:
         print(f"Error updating cover letter: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/update-application-progress", methods=["POST"])
+def update_application_progress():
+    try:
+        user_email = request.json.get("email")
+        job_offer = request.json.get("jobOffer")
+        status = request.json.get("status")
+
+        if not user_email or not job_offer or not status:
+            return (
+                jsonify(
+                    {
+                        "error": "Email, informations de l'offre d'emploi et progression sont requis"
+                    }
+                ),
+                400,
+            )
+
+        user_ref = db.collection("users").document(user_email)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+        user_data = user_doc.to_dict()
+        favorites = user_data.get("favorites", [])
+
+        # Mise à jour précise de l'offre correspondante
+        for job in favorites:
+            if job.get("job_url") == job_offer.get("job_url"):
+                if job["status"] == status:
+                    print("Status already updated")
+                    job["status"] = ""
+                    status = ""
+                else:
+                    job["status"] = status
+                url = job["job_url"]
+                break
+
+        user_ref.update({"favorites": favorites})
+
+        return (
+            jsonify(
+                {
+                    "status": status,
+                    "url": url,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print(f"Error updating application progress: {e}")
         return jsonify({"error": str(e)}), 500
 
 

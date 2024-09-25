@@ -50,6 +50,8 @@ export default function Favorites({
 
       const data = await response.json();
 
+      console.log(data);
+
       // Mise à jour immédiate de l'état
       setFavoriteJobOffers((prev) =>
         prev.map((offer) =>
@@ -67,6 +69,44 @@ export default function Favorites({
       );
 
       console.log('Cover letter updated successfully');
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApplicationProgressClick = async (jobOffer, status) => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/update-application-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          jobOffer: jobOffer,
+          status: status,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error updating application progress');
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      // Mise à jour de l'état favoriteJobOffers
+      setFavoriteJobOffers((prev) =>
+        prev.map((offer) =>
+          offer.job_url === data.url ? { ...offer, status: data.status } : offer
+        )
+      );
+
+      setSelectedOffer((prevSelectedOffer) => ({ ...prevSelectedOffer, status: data.status }));
+
+      console.log('Application progress updated successfully');
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -149,18 +189,38 @@ export default function Favorites({
             <li
               key={index}
               className={`p-4 shadow-sm cursor-pointer hover:bg-slate-100 relative ${
-                selectedOffer === offer ? 'bg-slate-100 border-l-2 border-slate-900' : ''
+                selectedOffer && selectedOffer.job_url === offer.job_url
+                  ? selectedOffer.status === 'applied'
+                    ? 'border-l-8 border-yellow-500 bg-slate-200'
+                    : selectedOffer.status === 'interview'
+                    ? 'border-l-8 border-green-500 bg-slate-200'
+                    : selectedOffer.status === 'rejected'
+                    ? 'border-l-8 border-red-500 bg-slate-200'
+                    : selectedOffer.status === ''
+                    ? 'border-l-2 border-slate-500 bg-slate-200'
+                    : ''
+                  : ''
+              } ${
+                offer.status === 'applied'
+                  ? 'border-l-8 border-yellow-300 hover:border-yellow-500 '
+                  : ''
+              } ${
+                offer.status === 'interview'
+                  ? 'border-l-8 border-green-300 hover:border-green-500 '
+                  : ''
+              } ${
+                offer.status === 'rejected' ? 'border-l-8 border-red-300 hover:border-red-500 ' : ''
               }`}
               onClick={() => handleSelectOffer(offer)}
             >
-              <p className='flex gap-2 items-center mb-2'>
+              <div className='flex gap-2 items-center mb-2'>
                 <img
                   className='w-9 h-9 rounded-full border'
                   src={offer.company_logo}
                   alt=''
                 />
                 <h3 className='text-lg font-bold text-slate-900 pr-10'>{offer.title}</h3>
-              </p>
+              </div>
               <p className='text-slate-700 mb-1'>{offer.company}</p>
               <p className='text-slate-400 mb-1'>{offer.location}</p>
               <Tooltip
@@ -191,6 +251,42 @@ export default function Favorites({
                   <FavoriteOutlinedIcon />
                 </button>
               </Tooltip>
+              {offer.status && (
+                <p
+                  className={`absolute bottom-4 right-4 p-2 rounded-lg border text-slate-600 ${
+                    offer.status === 'applied'
+                      ? 'border-yellow-300 text-yellow-700'
+                      : offer.status === 'interview'
+                      ? 'border-green-300 text-green-700'
+                      : offer.status === 'rejected'
+                      ? 'border-red-300 text-red-700'
+                      : ''
+                  }
+                    ${
+                      selectedOffer &&
+                      selectedOffer.job_url === offer.job_url &&
+                      offer.status === 'applied'
+                        ? 'bg-yellow-200'
+                        : ''
+                    } 
+                    ${
+                      selectedOffer &&
+                      selectedOffer.job_url === offer.job_url &&
+                      offer.status === 'interview'
+                        ? 'bg-green-200'
+                        : ''
+                    } 
+                    ${
+                      selectedOffer &&
+                      selectedOffer.job_url === offer.job_url &&
+                      offer.status === 'rejected'
+                        ? 'bg-red-200'
+                        : ''
+                    }`}
+                >
+                  {offer.status}
+                </p>
+              )}
             </li>
           ))}
         </ul>
@@ -201,7 +297,7 @@ export default function Favorites({
         {selectedOffer ? (
           <>
             <div className='border-b p-4'>
-              <p className='flex gap-4 items-center mb-4'>
+              <div className='flex gap-4 items-center mb-4'>
                 <img
                   className='rounded-full border w-16 h-16'
                   src={selectedOffer.company_logo}
@@ -210,7 +306,7 @@ export default function Favorites({
                 <div className='flex pr-20 row justify-between w-100%'>
                   <h2 className='text-2xl font-semibold text-slate-800'>{selectedOffer.title}</h2>
                 </div>
-              </p>
+              </div>
               <p className='text-slate-700 mb-2'>
                 <strong>Company:</strong> {selectedOffer.company}
               </p>
@@ -220,17 +316,39 @@ export default function Favorites({
               <p className='text-slate-700 mb-2'>
                 <strong>Date:</strong> {selectedOffer.date}
               </p>
-              <p className='text-slate-700 mb-2'>
-                <strong>Job URL:</strong>{' '}
+              <div className='flex py-2 gap-2'>
                 <a
                   href={selectedOffer.job_url}
+                  className='flex-1 text-center py-2 px-4 rounded-md border border-slate-300 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all ease-in-out duration-300'
                   target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-blue-600 hover:text-blue-800'
                 >
-                  {selectedOffer.job_url}
+                  Open Link
                 </a>
-              </p>
+                <button
+                  onClick={() => handleApplicationProgressClick(selectedOffer, 'applied')}
+                  className={`flex-1 py-2 px-4 rounded-md border border-yellow-300 hover:bg-yellow-200 text-slate-700 hover:text-slate-900 transition-all ease-in-out duration-300 ${
+                    selectedOffer.status === 'applied' ? 'bg-yellow-200' : ''
+                  }`}
+                >
+                  Applied
+                </button>
+                <button
+                  onClick={() => handleApplicationProgressClick(selectedOffer, 'interview')}
+                  className={`flex-1 py-2 px-4 rounded-md border border-green-300 hover:bg-green-200 text-slate-700 hover:text-slate-900 transition-all ease-in-out duration-300 ${
+                    selectedOffer.status === 'interview' ? 'bg-green-200' : ''
+                  }`}
+                >
+                  Interview
+                </button>
+                <button
+                  onClick={() => handleApplicationProgressClick(selectedOffer, 'rejected')}
+                  className={`flex-1 py-2 px-4 rounded-md border border-red-300 hover:bg-red-200 text-slate-700 hover:text-slate-900 transition-all ease-in-out duration-300 ${
+                    selectedOffer.status === 'rejected' ? 'bg-red-200' : ''
+                  }`}
+                >
+                  Rejected
+                </button>
+              </div>
             </div>
             <div className='flex w-full p-3 justify-center gap-2 text-slate-700 font-medium'>
               <div className='w-full flex p-3 gap-2 bg-slate-100 rounded-lg'>
@@ -254,7 +372,7 @@ export default function Favorites({
             </div>
             <div
               className='text-slate-600 p-5 overflow-y-auto'
-              style={{ height: 'calc(100vh - 385px)' }}
+              style={{ height: 'calc(100vh - 410px)' }}
             >
               {descriptionTab === 'description' &&
               selectedOffer &&
@@ -281,10 +399,10 @@ export default function Favorites({
               ) : descriptionTab === 'coverLetter' && !selectedOffer.cover_letter ? (
                 <div className='flex justify-center items-center h-full'>
                   {isLoading ? (
-                    <div className='flex flex-1 items-center'>
+                    <div className='flex flex-1 items-center justify-center'>
                       <svg
                         aria-hidden='true'
-                        className='fill-slate-700 flex flex-1 items-center  w-24 h-24 text-slate-200 animate-spin'
+                        className='fill-slate-700 flex  items-center  w-24 h-24 text-slate-200 animate-spin'
                         viewBox='0 0 100 101'
                         fill='none'
                         xmlns='http://www.w3.org/2000/svg'
