@@ -148,7 +148,11 @@ export default function Favorites({
           : prevSelectedOffer
       );
     } catch (error) {
-      console.error('Error:', error);
+      if (error.message === '') {
+        alert('CV non disponible');
+      } else {
+        console.error('Error:', error.message);
+      }
     } finally {
       setIsLoading(false);
     }

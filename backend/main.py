@@ -282,6 +282,7 @@ def get_resume_text():
         print(f"Error retrieving resume text: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/resume-upload", methods=["POST"])
 def upload_resume():
     try:
@@ -386,15 +387,13 @@ def generate_cover_letter():
         user_ref = db.collection("users").document(user_email)
         user_doc = user_ref.get()
 
-        print("test")
-
         if not user_doc.exists:
             return jsonify({"error": "Utilisateur non trouvé"}), 404
 
         user_data = user_doc.to_dict()
         resume_text = user_data.get("resume_text", "")
 
-        if not resume_text:
+        if resume_text == "":   
             return jsonify({"error": "CV non disponible"}), 400
 
         prompt = (
@@ -465,6 +464,7 @@ def register_user():
             "nom": user_data.get("family_name", ""),
             "prenom": user_data.get("given_name", ""),
             "email": user_data.get("email", ""),
+            "resume_text": "",
             "favorites": [],
         }
 
@@ -525,63 +525,73 @@ def update_cover_letter():
         print(f"Error updating cover letter: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/update-user-data', methods=['POST'])
+
+@app.route("/update-user-data", methods=["POST"])
 def update_user_data():
     data = request.get_json()
-    email = data.get('email')
-    first_name = data.get('firstName')
-    last_name = data.get('lastName')
-    phone_number = data.get('phoneNumber')
-    address = data.get('address')
-    zip_code = data.get('zip')
-    city = data.get('city')
-    country = data.get('country')
+    email = data.get("email")
+    first_name = data.get("firstName")
+    last_name = data.get("lastName")
+    phone_number = data.get("phoneNumber")
+    address = data.get("address")
+    zip_code = data.get("zip")
+    city = data.get("city")
+    country = data.get("country")
 
-    user_ref = db.collection('users').document(email)
+    user_ref = db.collection("users").document(email)
     user_doc = user_ref.get()
 
     if user_doc.exists:
-        user_ref.update({
-            'prenom': first_name,
-            'nom': last_name,
-            'phone_number': phone_number,
-            'address': address,
-            'zip_code': zip_code,
-            'city': city,
-            'country': country
-        })
+        user_ref.update(
+            {
+                "prenom": first_name,
+                "nom": last_name,
+                "phone_number": phone_number,
+                "address": address,
+                "zip_code": zip_code,
+                "city": city,
+                "country": country,
+            }
+        )
         return (
             jsonify(
                 {
-                    "prenom": "Successfully updated user data for user with email: " + email
+                    "prenom": "Successfully updated user data for user with email: "
+                    + email
                 }
             ),
             200,
         )
     else:
-        return jsonify({'error': 'User not found'}), 404
-    
-@app.route('/get-user-data', methods=['POST'])
+        return jsonify({"error": "User not found"}), 404
+
+
+@app.route("/get-user-data", methods=["POST"])
 def get_user_data():
     data = request.get_json()
-    email = data.get('email')
+    email = data.get("email")
 
-    user_ref = db.collection('users').document(email)
+    user_ref = db.collection("users").document(email)
     user_doc = user_ref.get()
 
     if user_doc.exists:
         user_data = user_doc.to_dict()
-        return jsonify({
-            'firstName': user_data.get('prenom', ''),
-            'lastName': user_data.get('nom', ''),
-            'phoneNumber': user_data.get('phone_number', ''),
-            'address': user_data.get('address', ''),
-            'zip': user_data.get('zip_code', ''),
-            'city': user_data.get('city', ''),
-            'country': user_data.get('country', '')
-        }), 200
+        return (
+            jsonify(
+                {
+                    "firstName": user_data.get("prenom", ""),
+                    "lastName": user_data.get("nom", ""),
+                    "phoneNumber": user_data.get("phone_number", ""),
+                    "address": user_data.get("address", ""),
+                    "zip": user_data.get("zip_code", ""),
+                    "city": user_data.get("city", ""),
+                    "country": user_data.get("country", ""),
+                }
+            ),
+            200,
+        )
     else:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({"error": "User not found"}), 404
 
 
 @app.route("/update-application-progress", methods=["POST"])
