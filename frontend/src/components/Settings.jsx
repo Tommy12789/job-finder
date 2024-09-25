@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Settings({ user }) {
+export default function Settings({ user, handleUserInformationsChange, userInformations}) {
   const [resumeText, setResumeText] = useState('Le texte de votre CV apparaîtra ici.');
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,29 +11,69 @@ export default function Settings({ user }) {
       zip: '',
       city: '',
       country: '',
-  });  
+  });
+
+  // Récupérer les informations de l'utilisateur au montage du composant
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/get-user-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const data = await response.json();
+        // Met à jour les données du formulaire avec les informations récupérées
+        setFormData({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          phoneNumber: data.phoneNumber || '',
+          address: data.address || '',
+          zip: data.zip || '',
+          city: data.city || '',
+          country: data.country || '',
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [user.email]); // Le useEffect s'exécute au chargement du composant ou quand l'email change
 
   const toggleEdit = async () => {
     if (isEditing) {
-      try {
-        const response = await fetch('http://127.0.0.1:5000/update-user-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email, ...formData }),
-        });
-  
-        if (!response.ok) {
-          throw new Error('Failed to update user data');
-        }
-  
-        const data = await response.json();
-        console.log('User data updated successfully:', data);
-      } catch (error) {
-        console.error('Error updating user data:', error);
-      }
+      await updateUserData(); // Appel à la fonction pour mettre à jour les données
     }
-  
     setIsEditing(!isEditing);
+  };
+
+  const updateUserData = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/update-user-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, ...formData }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user data');
+      }
+
+      const data = await response.json();
+      for (const [key, value] of Object.entries(data)) {
+        handleUserInformationsChange(key, value);
+      }
+
+      console.log('User data updated successfully:', data);
+    } catch (error) {
+      console.error('Error updating user data:', error);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -94,31 +134,6 @@ export default function Settings({ user }) {
     }
   };
 
-  useEffect(() => {
-    if (!isEditing) {
-      const updateUserData = async () => {
-        try {
-          const response = await fetch('http://127.0.0.1:5000/update-user-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, ...formData }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to update user data');
-          }
-
-          const data = await response.json();
-          console.log('User data updated successfully:', data);
-        } catch (error) {
-          console.error('Error updating user data:', error);
-        }
-      };
-
-      updateUserData();
-    }
-  }, [isEditing, formData, user.email]);
-
   return (
     <div className='flex row' style={{ height: 'calc(100vh - 40px)' }}>
       <div className='bg-slate-100 w-full h-100 pt-10 pl-10 pb-10 flex'>
@@ -134,7 +149,7 @@ export default function Settings({ user }) {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
-                  />
+                />
                 <input
                   placeholder='Last name'
                   type='text'

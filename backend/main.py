@@ -285,7 +285,6 @@ def get_resume_text():
         print(f"Error retrieving resume text: {e}")
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/resume-upload", methods=["POST"])
 def upload_resume():
     try:
@@ -554,12 +553,45 @@ def update_user_data():
             'city': city,
             'country': country
         })
-        return jsonify({'message': 'User data updated successfully'}), 200
+        return (
+            jsonify(
+                {
+                    "prenom": first_name,
+                    "nom": last_name,
+                    "phone_number": phone_number,
+                    "address": address,
+                    "zip_code": zip_code,
+                    "city": city,
+                    "country": country
+                }
+            ),
+            200,
+        )
+    else:
+        return jsonify({'error': 'User not found'}), 404
+    
+@app.route('/get-user-data', methods=['POST'])
+def get_user_data():
+    data = request.get_json()
+    email = data.get('email')
+
+    user_ref = db.collection('users').document(email)
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        return jsonify({
+            'firstName': user_data.get('prenom', ''),
+            'lastName': user_data.get('nom', ''),
+            'phoneNumber': user_data.get('phone_number', ''),
+            'address': user_data.get('address', ''),
+            'zip': user_data.get('zip_code', ''),
+            'city': user_data.get('city', ''),
+            'country': user_data.get('country', '')
+        }), 200
     else:
         return jsonify({'error': 'User not found'}), 404
 
-if __name__ == '__main__':
-    app.run(debug=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
