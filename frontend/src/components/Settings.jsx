@@ -11,7 +11,7 @@ export default function Settings({ user }) {
       zip: '',
       city: '',
       country: '',
-  });
+  });  
 
   const toggleEdit = async () => {
     if (isEditing) {
@@ -122,7 +122,7 @@ export default function Settings({ user }) {
   return (
     <div className='flex row' style={{ height: 'calc(100vh - 40px)' }}>
       <div className='bg-slate-100 w-full h-100 pt-10 pl-10 pb-10 flex'>
-        <div className='bg-slate-50 w-full h-full mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
+        <div className='bg-slate-50 w-full h-max mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
           <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'> Personnal informations </h2>
           <div className='flex flex-1 flex-col p-6 gap-3'>
               <div className='flex gap-3'>
@@ -133,8 +133,8 @@ export default function Settings({ user }) {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className='p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1'
-                />
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                  />
                 <input
                   placeholder='Last name'
                   type='text'
@@ -142,8 +142,8 @@ export default function Settings({ user }) {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className='p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1'
-                />
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                  />
               </div>
               <input
                 placeholder='Phone number'
@@ -152,8 +152,8 @@ export default function Settings({ user }) {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className='p-2 bg-slate-100 rounded-lg border border-slate-200'
-              />
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                />
               <input
                 placeholder='Address'
                 type='text'
@@ -161,8 +161,8 @@ export default function Settings({ user }) {
                 value={formData.address}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className='p-2 bg-slate-100 rounded-lg border border-slate-200'
-              />
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                />
               <input
                 placeholder='Zip code'
                 type='text'
@@ -170,8 +170,8 @@ export default function Settings({ user }) {
                 value={formData.zip}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className='p-2 bg-slate-100 rounded-lg border border-slate-200'
-              />
+                className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                />
               <div className='flex gap-3'>
                 <input
                   placeholder='City'
@@ -180,8 +180,8 @@ export default function Settings({ user }) {
                   value={formData.city}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className='p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1'
-                />
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                  />
                 <input
                   placeholder='Country'
                   type='text'
@@ -189,12 +189,12 @@ export default function Settings({ user }) {
                   value={formData.country}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className='p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1'
-                />
+                  className={`p-2 bg-slate-100 rounded-lg border border-slate-200 flex-1 ${!isEditing ? 'cursor-not-allowed' : ''}`}
+                  />
               </div>
               <button
                 onClick={toggleEdit}
-                className='py-2 px-4 bg-blue-500 text-white rounded-lg'
+                className={`py-2 px-4 rounded-lg ${isEditing ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}
               >
                 {isEditing ? 'Save' : 'Edit'}
               </button>

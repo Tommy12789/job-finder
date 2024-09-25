@@ -546,8 +546,8 @@ def update_user_data():
 
     if user_doc.exists:
         user_ref.update({
-            'first_name': first_name,
-            'last_name': last_name,
+            'prenom': first_name,
+            'nom': last_name,
             'phone_number': phone_number,
             'address': address,
             'zip_code': zip_code,

@@ -24,4 +24,8 @@ body {
   ::-webkit-scrollbar-thumb:hover {
     background: #555; 
   }
+
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
 }
