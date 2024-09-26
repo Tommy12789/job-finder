@@ -10,6 +10,7 @@ import fitz
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -663,6 +664,96 @@ def update_application_progress():
         print(f"Error updating application progress: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/add-manually-favorite", methods=["POST"])
+def add_manually_favorite():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        link = data.get("link")
+        print(email)
+        print(link)
+        
+        if not email or not link:
+            return jsonify({"error": "Email et lien de l'offre sont requis"}), 400
+
+        # Récupération de la page de l'offre
+        config = {
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+            }
+        }
+        soup = get_page(link, config, retries=10)
+        
+        with open('soup.html', 'w', encoding='utf-8') as file:
+            file.write(soup.prettify())
+        
+        if soup:
+            # Récupération des informations principales de l'offre
+            title = soup.find("h3", class_="sub-nav-cta__header").text.strip()
+            print(title)
+            company = soup.find("a", class_="topcard__org-name-link").text.strip()
+            print(company)
+            location = soup.find("span", class_="sub-nav-cta__meta-text").text.strip()
+            print(location)
+            date = soup.find('span', class_='post-date').text.strip() if soup.find('span', class_='post-date') else datetime.now().strftime('%Y-%m-%d')
+            company_logo = soup.find('img', class_='artdeco-entity-image--square-5')['data-delayed-url']
+            print(company_logo)
+
+            # Récupération et nettoyage de la description de l'offre
+            div = soup.find("div", class_="description__text description__text--rich")
+            if not div:
+                return "Could not find Job Description"
+
+            for element in div.find_all(["span", "a"]):
+                element.decompose()
+
+            for ul in div.find_all("ul"):
+                for li in ul.find_all("li"):
+                    li.insert(0, "-")
+
+            text = div.get_text(separator="\n").strip()
+            text = text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
+            text = text.replace("Show less", "").replace("Show more", "")
+            
+            job_description = text
+            print(job_description)
+
+
+            # Construction de l'objet job_offer
+            job_offer = {
+                'title': title,
+                'company': company,
+                'location': location,
+                'date': date,
+                'company_logo': company_logo,
+                'job_url': link,
+                'job_description': job_description,
+                'status': ''
+            }
+            
+            # Vérifier si l'utilisateur existe dans Firestore
+            user_ref = db.collection("users").document(email)
+            user_doc = user_ref.get()
+
+            if user_doc.exists:
+                user_data = user_doc.to_dict()
+                favorites = user_data.get("favorites", [])
+
+                # Ajouter l'offre à la liste des favoris si elle n'y est pas déjà
+                if job_offer not in favorites:
+                    favorites.append(job_offer)
+                    user_ref.update({"favorites": favorites})
+                    return jsonify({"message": "Favori ajouté avec succès", "job_offer": job_offer}), 200
+                else:
+                    return jsonify({"message": "Cette offre est déjà dans les favoris"}), 200
+            else:
+                return jsonify({"error": "Utilisateur non trouvé"}), 404
+        else:
+            return jsonify({"error": "Impossible de récupérer les informations de l'offre"}), 500
+
+    except Exception as e:
+        print(f"Error processing manually added favorite: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
