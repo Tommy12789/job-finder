@@ -68,8 +68,8 @@ function App() {
       return;
     }
 
-    const isFavorited = favoriteJobOffers.some((fav) => fav.title === jobOffer.title);
-
+    const isFavorited = favoriteJobOffers.some((fav) => fav.job_url === jobOffer.job_url);
+    console.log(jobOffer);
     try {
       const requestBody = {
         jobOffer,
@@ -96,7 +96,7 @@ function App() {
 
       setFavoriteJobOffers((prevFavoriteJobOffers) =>
         isFavorited
-          ? prevFavoriteJobOffers.filter((fav) => fav.title !== jobOffer.title)
+          ? prevFavoriteJobOffers.filter((fav) => fav.job_url !== jobOffer.job_url)
           : [...prevFavoriteJobOffers, jobOffer]
       );
 

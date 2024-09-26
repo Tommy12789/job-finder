@@ -63,7 +63,7 @@ def parse_jobs_from_page(config):
         for page_num in range(config["pages_to_scrape"]):
             url = (
                 f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
-                f"keywords={keywords}&location={location}&f_TPR=&f_WT={query['experience_level']}"
+                f"keywords={keywords}&location={location}&f_TPR=&f_E={query['experience_level']}"
                 f"&geoId=&f_TPR={config['timespan']}&start={10 * page_num}"
             )
 
@@ -125,26 +125,59 @@ def parse_job_details(soup):
 
 
 def parse_job_description(desc_soup):
-    """Extract and clean the job description from the given soup object."""
+    """Extract and clean the job description while keeping the basic HTML structure."""
     if not desc_soup:
         return "Could not find Job Description"
 
+    # Find the div containing the job description
     div = desc_soup.find("div", class_="description__text description__text--rich")
     if not div:
         return "Could not find Job Description"
 
+    # Remove unnecessary tags (like <span> or <a>)
     for element in div.find_all(["span", "a"]):
         element.decompose()
 
+    # Process list items, retaining the <ul> and <li> tags
     for ul in div.find_all("ul"):
         for li in ul.find_all("li"):
-            li.insert(0, "-")
+            li.string = f"- {li.get_text(strip=True)}"
 
-    text = div.get_text(separator="\n").strip()
-    text = text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
-    text = text.replace("Show less", "").replace("Show more", "")
+    # Clean up text content and prettify
+    html_content = div.prettify()  # Retain the HTML structure for rendering
 
-    return text
+    # Remove "Show less" and "Show more" text
+    html_content = (
+        html_content.replace("Show less", "")
+        .replace("Show more", "")
+        .replace("<br/>", "")
+    )
+
+    # Add newlines after certain closing tags to improve readability
+    tags_to_break_after = [
+        "</p>",
+        "</li>",
+        "</ul>",
+        "</h2>",
+        "</h3>",
+        "</strong>",
+        "</em>",
+    ]
+
+    # Insert newlines after specified tags
+    for tag in tags_to_break_after:
+        html_content = html_content.replace(tag, tag + "\n")
+
+    # Remove any excessive or extra newlines created accidentally
+    html_content = "\n".join(
+        [line for line in html_content.splitlines() if line.strip()]
+    )
+
+    # Optionally, save the cleaned-up HTML to a file for further use
+    with open("job_description.html", "w") as file:
+        file.write(html_content)
+
+    return html_content
 
 
 def get_job_description(job, config):
@@ -400,7 +433,7 @@ def generate_cover_letter():
         lastname = user_data.get("nom", "")
         resume_text = user_data.get("resume_text", "")
 
-        if resume_text == "":   
+        if resume_text == "":
             return jsonify({"error": "CV non disponible"}), 400
 
         prompt = (
@@ -422,7 +455,10 @@ def generate_cover_letter():
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "As an HR professional, I need your assistance in crafting an exceptional cover letter"},
+                {
+                    "role": "system",
+                    "content": "As an HR professional, I need your assistance in crafting an exceptional cover letter",
+                },
                 {
                     "role": "user",
                     "content": prompt,

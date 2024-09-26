@@ -3,6 +3,7 @@ import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { useState } from 'react';
 import { Tooltip, Box, Button } from '@mui/material';
+import JobCreationModal from './JobCreationModal';
 
 export default function Favorites({
   favoriteJobOffers,
@@ -10,10 +11,26 @@ export default function Favorites({
   user,
   setFavoriteJobOffers,
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [descriptionTab, setDescriptionTab] = useState('description');
   const [textAreaText, setTextAreaText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (formData) => {
+    const jobOffer = {
+      title: formData.title,
+      company: formData.company,
+      location: formData.location,
+      job_url: formData.jobUrl,
+      job_description: formData.jobDescription,
+      status: '',
+    };
+    handleFavoriteClick(jobOffer);
+  };
 
   const handleFavoritesClick = (jobOffer) => {
     handleFavoriteClick(jobOffer);
@@ -55,7 +72,7 @@ export default function Favorites({
       // Mise à jour immédiate de l'état
       setFavoriteJobOffers((prev) =>
         prev.map((offer) =>
-          offer.title === selectedOffer.title
+          offer.job_url === selectedOffer.job_url
             ? { ...offer, cover_letter: data.cover_letter }
             : offer
         )
@@ -63,7 +80,7 @@ export default function Favorites({
 
       // Mise à jour immédiate de l'offre sélectionnée
       setSelectedOffer((prevSelectedOffer) =>
-        prevSelectedOffer && prevSelectedOffer.title === selectedOffer.title
+        prevSelectedOffer && prevSelectedOffer.job_url === selectedOffer.job_url
           ? { ...prevSelectedOffer, cover_letter: data.cover_letter }
           : prevSelectedOffer
       );
@@ -137,7 +154,7 @@ export default function Favorites({
       // Mise à jour immédiate de l'état
       setFavoriteJobOffers((prev) =>
         prev.map((offer) =>
-          offer.title === jobOffer.title ? { ...offer, cover_letter: data.cover_letter } : offer
+          offer.job_url === jobOffer.job_url ? { ...offer, cover_letter: data.cover_letter } : offer
         )
       );
 
@@ -185,9 +202,10 @@ export default function Favorites({
               } in favorites`
             : "You don't have any favorite offers"}
         </h2>
+
         <ul
-          className='overflow-y-auto'
-          style={{ height: 'calc(100vh - 118px)' }}
+          className='overflow-y-auto flex-grow '
+          style={{ height: 'calc(100vh - 220px)' }}
         >
           {favoriteJobOffers.map((offer, index) => (
             <li
@@ -293,7 +311,22 @@ export default function Favorites({
               )}
             </li>
           ))}
+          <li className='h-[90px]'></li>
         </ul>
+        <div className='flex justify-center p-4'>
+          <button
+            className=' shadow-lg bg-slate-50 text-slate-700 px-5 py-2 rounded-lg border-2 hover:bg-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all ease-in-out duration-300'
+            onClick={openModal}
+          >
+            Add New Offer
+          </button>
+        </div>
+
+        <JobCreationModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onSubmit={handleSubmit}
+        />
       </div>
 
       {/* Right panel - Selected offer details */}
