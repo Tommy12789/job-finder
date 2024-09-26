@@ -45,6 +45,18 @@ export default function Favorites({
     }
   };
 
+  const handleSubmitManual = async (manualJobData) => {
+    const jobOffer = {
+      title: manualJobData.title,
+      company: manualJobData.company,
+      location: manualJobData.location,
+      job_url: manualJobData.jobUrl,
+      job_description: manualJobData.jobDescription,
+      status: '',
+    };
+    handleFavoriteClick(jobOffer);
+  };
+
   const handleFavoritesClick = (jobOffer) => {
     handleFavoriteClick(jobOffer);
   };
@@ -341,6 +353,7 @@ export default function Favorites({
           isOpen={isModalOpen}
           onClose={closeModal}
           onSubmit={handleSubmit}
+          onSubmitManual={handleSubmitManual}
         />
       </div>
 
