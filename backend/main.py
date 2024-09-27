@@ -11,6 +11,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import random
 
 load_dotenv()
 
@@ -31,26 +32,39 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 
-def get_page(url, config, retries=3, delay=1):
-    """Fetch the page content from the given URL with retries."""
-    for attempt in range(retries):
-        time.sleep(delay)
+def get_page(url, config, max_retries=5, base_delay=1, max_delay=60):
+    """Fetch the page content from the given URL with retries and exponential backoff."""
+    headers = config["headers"]
+
+    for attempt in range(max_retries):
         try:
-            response = requests.get(url, headers=config["headers"], timeout=5)
+            response = requests.get(url, headers=headers, timeout=10)
+
             if response.status_code == 200:
                 print(f"Page retrieved successfully: {url}")
                 return BeautifulSoup(response.content, "html.parser")
+
             elif response.status_code == 429:
-                print("Rate limit exceeded. Retrying after delay...")
-                time.sleep(5)
+                print(
+                    f"Rate limit exceeded (attempt {attempt + 1}/{max_retries}). Retrying after delay..."
+                )
+
+                # Calculate delay with exponential backoff and jitter
+                delay = min(base_delay * (2**attempt) + random.uniform(0, 1), max_delay)
+                time.sleep(delay)
+
             else:
                 print(f"Failed to retrieve page. Status code: {response.status_code}")
                 return None
-        except requests.exceptions.Timeout:
-            print("Timeout error")
-        except Exception as e:
-            print(f"An error occurred: {e}")
-    print(f"Failed to retrieve page: {url}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred (attempt {attempt + 1}/{max_retries}): {e}")
+
+            # Calculate delay with exponential backoff and jitter
+            delay = min(base_delay * (2**attempt) + random.uniform(0, 1), max_delay)
+            time.sleep(delay)
+
+    print(f"Failed to retrieve page after {max_retries} attempts: {url}")
     return None
 
 
@@ -64,7 +78,7 @@ def parse_jobs_from_page(config):
         for page_num in range(config["pages_to_scrape"]):
             url = (
                 f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
-                f"keywords={keywords}&location={location}&f_TPR=&f_WT={query['experience_level']}"
+                f"keywords={keywords}&location={location}&f_TPR=&f_E={query['experience_level']}"
                 f"&geoId=&f_TPR={config['timespan']}&start={10 * page_num}"
             )
 
@@ -72,7 +86,9 @@ def parse_jobs_from_page(config):
             if soup:
                 jobs = parse_job_details(soup)
                 all_job_offers.extend(jobs)
-            time.sleep(5)
+
+            # Add a delay between requests to different pages
+            time.sleep(random.uniform(2, 5))
 
     print(f"Total job cards scraped: {len(all_job_offers)}")
     return all_job_offers
@@ -139,13 +155,39 @@ def parse_job_description(desc_soup):
 
     for ul in div.find_all("ul"):
         for li in ul.find_all("li"):
-            li.insert(0, "-")
+            li.string = f"- {li.get_text(strip=True)}"
 
-    text = div.get_text(separator="\n").strip()
-    text = text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
-    text = text.replace("Show less", "").replace("Show more", "")
+    # Clean up text content and prettify
+    html_content = div.prettify()  # Retain the HTML structure for rendering
 
-    return text
+    # Remove "Show less" and "Show more" text
+    html_content = (
+        html_content.replace("Show less", "")
+        .replace("Show more", "")
+        .replace("<br/>", "")
+    )
+
+    # Add newlines after certain closing tags to improve readability
+    tags_to_break_after = [
+        "</p>",
+        "</li>",
+        "</ul>",
+        "</h2>",
+        "</h3>",
+        "</strong>",
+        "</em>",
+    ]
+
+    # Insert newlines after specified tags
+    for tag in tags_to_break_after:
+        html_content = html_content.replace(tag, tag + "\n")
+
+    # Remove any excessive or extra newlines created accidentally
+    html_content = "\n".join(
+        [line for line in html_content.splitlines() if line.strip()]
+    )
+
+    return html_content
 
 
 def get_job_description(job, config):
@@ -401,7 +443,7 @@ def generate_cover_letter():
         lastname = user_data.get("nom", "")
         resume_text = user_data.get("resume_text", "")
 
-        if resume_text == "":   
+        if resume_text == "":
             return jsonify({"error": "CV non disponible"}), 400
 
         prompt = (
@@ -423,7 +465,10 @@ def generate_cover_letter():
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "As an HR professional, I need your assistance in crafting an exceptional cover letter"},
+                {
+                    "role": "system",
+                    "content": "As an HR professional, I need your assistance in crafting an exceptional cover letter",
+                },
                 {
                     "role": "user",
                     "content": prompt,
@@ -664,6 +709,7 @@ def update_application_progress():
         print(f"Error updating application progress: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/add-manually-favorite", methods=["POST"])
 def add_manually_favorite():
     try:
@@ -672,7 +718,7 @@ def add_manually_favorite():
         link = data.get("link")
         print(email)
         print(link)
-        
+
         if not email or not link:
             return jsonify({"error": "Email et lien de l'offre sont requis"}), 400
 
@@ -682,11 +728,11 @@ def add_manually_favorite():
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
             }
         }
-        soup = get_page(link, config, retries=10)
-        
-        with open('soup.html', 'w', encoding='utf-8') as file:
+        soup = get_page(link, config)
+
+        with open("soup.html", "w", encoding="utf-8") as file:
             file.write(soup.prettify())
-        
+
         if soup:
             # Récupération des informations principales de l'offre
             title = soup.find("h3", class_="sub-nav-cta__header").text.strip()
@@ -695,8 +741,14 @@ def add_manually_favorite():
             print(company)
             location = soup.find("span", class_="sub-nav-cta__meta-text").text.strip()
             print(location)
-            date = soup.find('span', class_='post-date').text.strip() if soup.find('span', class_='post-date') else datetime.now().strftime('%Y-%m-%d')
-            company_logo = soup.find('img', class_='artdeco-entity-image--square-5')['data-delayed-url']
+            date = (
+                soup.find("span", class_="post-date").text.strip()
+                if soup.find("span", class_="post-date")
+                else datetime.now().strftime("%Y-%m-%d")
+            )
+            company_logo = soup.find("img", class_="artdeco-entity-image--square-5")[
+                "data-delayed-url"
+            ]
             print(company_logo)
 
             # Récupération et nettoyage de la description de l'offre
@@ -712,25 +764,26 @@ def add_manually_favorite():
                     li.insert(0, "-")
 
             text = div.get_text(separator="\n").strip()
-            text = text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
+            text = (
+                text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
+            )
             text = text.replace("Show less", "").replace("Show more", "")
-            
+
             job_description = text
             print(job_description)
 
-
             # Construction de l'objet job_offer
             job_offer = {
-                'title': title,
-                'company': company,
-                'location': location,
-                'date': date,
-                'company_logo': company_logo,
-                'job_url': link,
-                'job_description': job_description,
-                'status': ''
+                "title": title,
+                "company": company,
+                "location": location,
+                "date": date,
+                "company_logo": company_logo,
+                "job_url": link,
+                "job_description": job_description,
+                "status": "",
             }
-            
+
             # Vérifier si l'utilisateur existe dans Firestore
             user_ref = db.collection("users").document(email)
             user_doc = user_ref.get()
@@ -743,17 +796,34 @@ def add_manually_favorite():
                 if job_offer not in favorites:
                     favorites.append(job_offer)
                     user_ref.update({"favorites": favorites})
-                    return jsonify({"message": "Favori ajouté avec succès", "job_offer": job_offer}), 200
+                    return (
+                        jsonify(
+                            {
+                                "message": "Favori ajouté avec succès",
+                                "job_offer": job_offer,
+                            }
+                        ),
+                        200,
+                    )
                 else:
-                    return jsonify({"message": "Cette offre est déjà dans les favoris"}), 200
+                    return (
+                        jsonify({"message": "Cette offre est déjà dans les favoris"}),
+                        200,
+                    )
             else:
                 return jsonify({"error": "Utilisateur non trouvé"}), 404
         else:
-            return jsonify({"error": "Impossible de récupérer les informations de l'offre"}), 500
+            return (
+                jsonify(
+                    {"error": "Impossible de récupérer les informations de l'offre"}
+                ),
+                500,
+            )
 
     except Exception as e:
         print(f"Error processing manually added favorite: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

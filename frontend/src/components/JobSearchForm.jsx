@@ -62,16 +62,21 @@ function JobSearchForm({ onSearch }) {
           />
         </div>
         <div className='w-1/3'>
-          <label className='block mb-2 text-sm font-medium text-slate-900'>
-            Niveau d'expérience
-          </label>
-          <input
+          <label className='block mb-2 text-sm font-medium text-slate-900'>Experience level </label>
+          <select
             className='bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
             type='text'
             name='experience_level'
             value={formData.experience_level}
             onChange={handleChange}
-          />
+          >
+            <option value='1'>Intern / Apprentice</option>
+            <option value='2'>Junior</option>
+            <option value='3'>Intermediate</option>
+            <option value='4'>Senior</option>
+            <option value='5'>Lead</option>
+            <option value='6'>Manager</option>
+          </select>
         </div>
       </div>
       <div className=' justify-end pt-5'>

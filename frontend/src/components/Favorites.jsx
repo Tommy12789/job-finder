@@ -101,7 +101,7 @@ export default function Favorites({
       // Mise à jour immédiate de l'état
       setFavoriteJobOffers((prev) =>
         prev.map((offer) =>
-          offer.title === selectedOffer.title
+          offer.job_url === selectedOffer.job_url
             ? { ...offer, cover_letter: data.cover_letter }
             : offer
         )
@@ -109,7 +109,7 @@ export default function Favorites({
 
       // Mise à jour immédiate de l'offre sélectionnée
       setSelectedOffer((prevSelectedOffer) =>
-        prevSelectedOffer && prevSelectedOffer.title === selectedOffer.title
+        prevSelectedOffer && prevSelectedOffer.job_url === selectedOffer.job_url
           ? { ...prevSelectedOffer, cover_letter: data.cover_letter }
           : prevSelectedOffer
       );
@@ -183,13 +183,13 @@ export default function Favorites({
       // Mise à jour immédiate de l'état
       setFavoriteJobOffers((prev) =>
         prev.map((offer) =>
-          offer.title === jobOffer.title ? { ...offer, cover_letter: data.cover_letter } : offer
+          offer.job_url === jobOffer.job_url ? { ...offer, cover_letter: data.cover_letter } : offer
         )
       );
 
       // Mise à jour immédiate de l'offre sélectionnée
       setSelectedOffer((prevSelectedOffer) =>
-        prevSelectedOffer && prevSelectedOffer.title === jobOffer.title
+        prevSelectedOffer && prevSelectedOffer.job_url === jobOffer.job_url
           ? { ...prevSelectedOffer, cover_letter: data.cover_letter }
           : prevSelectedOffer
       );
