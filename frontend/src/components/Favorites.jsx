@@ -4,6 +4,10 @@ import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { useState } from 'react';
 import { Tooltip, Box, Button } from '@mui/material';
 import JobCreationModal from './JobCreationModal';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import DoneIcon from '@mui/icons-material/Done';
 
 export default function Favorites({
   favoriteJobOffers,
@@ -214,6 +218,39 @@ export default function Favorites({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDownloadWord = () => {
+    if (!selectedOffer || !selectedOffer.cover_letter) {
+      console.error('No cover letter available to download');
+      return;
+    }
+
+    // Remplace les espaces par des underscores dans le nom de l'entreprise et de l'utilisateur
+    const companyName = selectedOffer.company.replace(/\s+/g, '_');
+    const userName = user.name.replace(/\s+/g, '_');
+    const fileName = `CoverLetter_${companyName}_${userName}.docx`;
+
+    // Créer un document Word avec docx
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun(selectedOffer.cover_letter), // Ajoute le contenu de la lettre de motivation dans le fichier Word
+              ],
+            }),
+          ],
+        },
+      ],
+    });
+
+    // Générer le document Word et le télécharger
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, fileName);
+    });
   };
 
   return (
@@ -454,12 +491,58 @@ export default function Favorites({
                     defaultValue={selectedOffer.cover_letter}
                     onChange={handleTextAreaChange}
                   ></textarea>
-                  <button
-                    className='px-4 py-2 bg-slate-50 border rounded-lg hover:bg-slate-200 transition-all ease-in-out duration-300 hover:text-slate-900 text-slate-700'
-                    onClick={() => handleUpdateCoverLetter(selectedOffer)}
-                  >
-                    Update
-                  </button>
+                  <div className='flex justify-row'>
+                    <Tooltip
+                      title='Download as docx'
+                      placement='top-start'
+                      componentsProps={{
+                        tooltip: {
+                          sx: {
+                            fontWeight: '400',
+                            bgcolor: '#f8fafc',
+                            color: '#0f172a',
+                            padding: '4px 10px',
+                            fontSize: '14px',
+                            borderRadius: '8px',
+                            border: 'solid #e2e8f0',
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                          },
+                        },
+                      }}
+                    >
+                      <button
+                        onClick={() => handleUpdateCoverLetter(selectedOffer)}
+                        className="transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300"
+                      >
+                        <FileDownloadIcon fontSize='small' />
+                      </button>
+                    </Tooltip>
+                    <Tooltip
+                      title='Update'
+                      placement='top-start'
+                      componentsProps={{
+                        tooltip: {
+                          sx: {
+                            fontWeight: '400',
+                            bgcolor: '#f8fafc',
+                            color: '#0f172a',
+                            padding: '4px 10px',
+                            fontSize: '14px',
+                            borderRadius: '8px',
+                            border: 'solid #e2e8f0',
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                          },
+                        },
+                      }}
+                    >
+                      <button
+                        onClick={handleDownloadWord}
+                        className="ml-5 transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300"
+                      >
+                        <DoneIcon fontSize='small' />
+                      </button>
+                    </Tooltip>
+                  </div>
                 </div>
               ) : descriptionTab === 'coverLetter' && !selectedOffer.cover_letter ? (
                 <div className='flex justify-center items-center h-full'>
