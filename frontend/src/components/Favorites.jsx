@@ -511,8 +511,8 @@ export default function Favorites({
                       }}
                     >
                       <button
-                        onClick={() => handleUpdateCoverLetter(selectedOffer)}
-                        className="transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300"
+                        onClick={handleDownloadWord}
+                        className='transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300'
                       >
                         <FileDownloadIcon fontSize='small' />
                       </button>
@@ -536,8 +536,8 @@ export default function Favorites({
                       }}
                     >
                       <button
-                        onClick={handleDownloadWord}
-                        className="ml-5 transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300"
+                        onClick={() => handleUpdateCoverLetter(selectedOffer)}
+                        className='ml-5 transition-colors duration-300 ease-in-out p-2 rounded-lg flex items-center bg-slate-200 text-slate-900 hover:bg-slate-300'
                       >
                         <DoneIcon fontSize='small' />
                       </button>
