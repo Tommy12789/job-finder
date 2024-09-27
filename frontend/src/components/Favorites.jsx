@@ -272,7 +272,7 @@ export default function Favorites({
           {favoriteJobOffers.map((offer, index) => (
             <li
               key={index}
-              className={`p-4 shadow-sm cursor-pointer hover:bg-slate-100 relative ${
+              className={`p-4 shadow-sm cursor-pointer hover:bg-slate-100 relative   ${
                 selectedOffer && selectedOffer.job_url === offer.job_url
                   ? selectedOffer.status === 'applied'
                     ? 'border-l-8 border-yellow-500 bg-slate-200'
@@ -378,7 +378,7 @@ export default function Favorites({
         <div className='relative'>
           <div className='absolute bottom-0 left-0 right-0 flex items-center justify-center p-4'>
             <button
-              className='shadow-lg bg-slate-50 text-slate-700 px-5 py-2 rounded-lg border-2 hover:bg-slate-200 hover:border-slate-800 hover:text-slate-900 transition-all ease-in-out duration-300'
+              className='mr-2 px-4 py-2 bg-slate-300 text-slate-800 rounded hover:bg-slate-400 transition-all ease-in-out duration-300'
               onClick={openModal}
             >
               Add New Offer

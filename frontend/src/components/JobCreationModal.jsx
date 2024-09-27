@@ -49,20 +49,20 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
       <div className='bg-white p-8 rounded-lg shadow-xl w-[600px] max-h-[90vh] overflow-y-auto'>
         <h2 className='text-2xl font-bold mb-4'>Add New Job</h2>
         <div className='flex items-center justify-center w-full bg-slate-200 p-2 rounded-lg gap-2 mb-4'>
-          <button 
+          <button
             className={`w-1/2 py-2 rounded-lg transition-all ease-in-out duration-300 ${
-              selectedTab === 'link' 
-                ? 'bg-slate-50 text-slate-900 border-2 border-slate-800' 
+              selectedTab === 'link'
+                ? 'bg-slate-50 text-slate-900'
                 : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
             }`}
             onClick={() => setSelectedTab('link')}
           >
             With Link
           </button>
-          <button 
+          <button
             className={`w-1/2 py-2 rounded-lg transition-all ease-in-out duration-300 ${
-              selectedTab === 'manual' 
-                ? 'bg-slate-50 text-slate-900 border-2 border-slate-800' 
+              selectedTab === 'manual'
+                ? 'bg-slate-50 text-slate-900'
                 : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
             }`}
             onClick={() => setSelectedTab('manual')}
@@ -70,11 +70,17 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
             Manually
           </button>
         </div>
-        <form className='p-2' onSubmit={handleSubmit}>
+        <form
+          className='p-2'
+          onSubmit={handleSubmit}
+        >
           {selectedTab === 'link' ? (
             <div className='mb-4'>
-              <label htmlFor='job_url' className='block text-sm font-medium text-gray-700 mb-1'>
-                Job Offer URL:
+              <label
+                htmlFor='job_url'
+                className='block text-sm font-medium text-gray-700 mb-1'
+              >
+                Job Offer URL (Linkedin, MyWorkDayJobs):
               </label>
               <input
                 type='url'
@@ -90,7 +96,10 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
           ) : (
             <>
               <div className='mb-4'>
-                <label htmlFor='title' className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  htmlFor='title'
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                >
                   Job Title:
                 </label>
                 <input
@@ -105,7 +114,10 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
                 />
               </div>
               <div className='mb-4'>
-                <label htmlFor='company' className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  htmlFor='company'
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                >
                   Company:
                 </label>
                 <input
@@ -120,7 +132,10 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
                 />
               </div>
               <div className='mb-4'>
-                <label htmlFor='location' className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  htmlFor='location'
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                >
                   Location:
                 </label>
                 <input
@@ -135,7 +150,10 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
                 />
               </div>
               <div className='mb-4'>
-                <label htmlFor='jobUrl' className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  htmlFor='jobUrl'
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                >
                   Job URL:
                 </label>
                 <input
@@ -150,7 +168,10 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
                 />
               </div>
               <div className='mb-4'>
-                <label htmlFor='jobDescription' className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  htmlFor='jobDescription'
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                >
                   Job Description:
                 </label>
                 <textarea
@@ -170,14 +191,14 @@ export default function JobCreationModal({ isOpen, onClose, onSubmit, onSubmitMa
             <button
               type='button'
               onClick={onClose}
-              className='px-4 py-2 bg-slate-50 text-slate-700 rounded hover:bg-slate-200 border-2'
+              className='px-4 py-2 bg-slate-50 text-slate-700 rounded hover:bg-slate-200 border-2 transition-all ease-in-out duration-300'
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+              className='mr-2 px-4 py-2 bg-slate-300 text-slate-800 rounded hover:bg-slate-400 transition-all ease-in-out duration-300'
               disabled={isLoading}
             >
               {isLoading ? 'Adding...' : 'Add Job'}

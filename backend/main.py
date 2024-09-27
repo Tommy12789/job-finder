@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import random
+import json
 
 load_dotenv()
 
@@ -716,13 +717,10 @@ def add_manually_favorite():
         data = request.get_json()
         email = data.get("email")
         link = data.get("link")
-        print(email)
-        print(link)
 
         if not email or not link:
             return jsonify({"error": "Email et lien de l'offre sont requis"}), 400
 
-        # Récupération de la page de l'offre
         config = {
             "headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
@@ -730,99 +728,128 @@ def add_manually_favorite():
         }
         soup = get_page(link, config)
 
-        with open("soup.html", "w", encoding="utf-8") as file:
-            file.write(soup.prettify())
+        website = link.split("/")[2]
+        if "myworkdayjobs" in website:
+            job_offer = parse_myworkdayjobs_job(soup)
+        elif "linkedin" in website:
+            job_offer = parse_linkedin_job(soup)
 
-        if soup:
-            # Récupération des informations principales de l'offre
-            title = soup.find("h3", class_="sub-nav-cta__header").text.strip()
-            print(title)
-            company = soup.find("a", class_="topcard__org-name-link").text.strip()
-            print(company)
-            location = soup.find("span", class_="sub-nav-cta__meta-text").text.strip()
-            print(location)
-            date = (
-                soup.find("span", class_="post-date").text.strip()
-                if soup.find("span", class_="post-date")
-                else datetime.now().strftime("%Y-%m-%d")
-            )
-            company_logo = soup.find("img", class_="artdeco-entity-image--square-5")[
-                "data-delayed-url"
-            ]
-            print(company_logo)
+        job_offer["job_url"] = link
 
-            # Récupération et nettoyage de la description de l'offre
-            div = soup.find("div", class_="description__text description__text--rich")
-            if not div:
-                return "Could not find Job Description"
+        user_ref = db.collection("users").document(email)
+        user_doc = user_ref.get()
 
-            for element in div.find_all(["span", "a"]):
-                element.decompose()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            favorites = user_data.get("favorites", [])
 
-            for ul in div.find_all("ul"):
-                for li in ul.find_all("li"):
-                    li.insert(0, "-")
-
-            text = div.get_text(separator="\n").strip()
-            text = (
-                text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
-            )
-            text = text.replace("Show less", "").replace("Show more", "")
-
-            job_description = text
-            print(job_description)
-
-            # Construction de l'objet job_offer
-            job_offer = {
-                "title": title,
-                "company": company,
-                "location": location,
-                "date": date,
-                "company_logo": company_logo,
-                "job_url": link,
-                "job_description": job_description,
-                "status": "",
-            }
-
-            # Vérifier si l'utilisateur existe dans Firestore
-            user_ref = db.collection("users").document(email)
-            user_doc = user_ref.get()
-
-            if user_doc.exists:
-                user_data = user_doc.to_dict()
-                favorites = user_data.get("favorites", [])
-
-                # Ajouter l'offre à la liste des favoris si elle n'y est pas déjà
-                if job_offer not in favorites:
-                    favorites.append(job_offer)
-                    user_ref.update({"favorites": favorites})
-                    return (
-                        jsonify(
-                            {
-                                "message": "Favori ajouté avec succès",
-                                "job_offer": job_offer,
-                            }
-                        ),
-                        200,
-                    )
-                else:
-                    return (
-                        jsonify({"message": "Cette offre est déjà dans les favoris"}),
-                        200,
-                    )
+            # Ajouter l'offre à la liste des favoris si elle n'y est pas déjà
+            if job_offer not in favorites:
+                favorites.append(job_offer)
+                user_ref.update({"favorites": favorites})
+                return (
+                    jsonify(
+                        {
+                            "message": "Favori ajouté avec succès",
+                            "job_offer": job_offer,
+                        }
+                    ),
+                    200,
+                )
             else:
-                return jsonify({"error": "Utilisateur non trouvé"}), 404
+                return (
+                    jsonify({"message": "Cette offre est déjà dans les favoris"}),
+                    200,
+                )
         else:
-            return (
-                jsonify(
-                    {"error": "Impossible de récupérer les informations de l'offre"}
-                ),
-                500,
-            )
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
 
     except Exception as e:
         print(f"Error processing manually added favorite: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+def parse_linkedin_job(soup):
+    if soup:
+        # Récupération des informations principales de l'offre
+        title = soup.find("h3", class_="sub-nav-cta__header").text.strip()
+        company = soup.find("a", class_="topcard__org-name-link").text.strip()
+        location = soup.find("span", class_="sub-nav-cta__meta-text").text.strip()
+        date = (
+            soup.find("span", class_="post-date").text.strip()
+            if soup.find("span", class_="post-date")
+            else datetime.now().strftime("%Y-%m-%d")
+        )
+        company_logo = soup.find("img", class_="artdeco-entity-image--square-5")[
+            "data-delayed-url"
+        ]
+
+        # Récupération et nettoyage de la description de l'offre
+        div = soup.find("div", class_="description__text description__text--rich")
+        if not div:
+            return "Could not find Job Description"
+
+        for element in div.find_all(["span", "a"]):
+            element.decompose()
+
+        for ul in div.find_all("ul"):
+            for li in ul.find_all("li"):
+                li.insert(0, "-")
+
+        text = div.get_text(separator="\n").strip()
+        text = text.replace("\n\n", "").replace("::marker", "-").replace("-\n", "- ")
+        text = text.replace("Show less", "").replace("Show more", "")
+
+        job_description = text
+
+        job_offer = {
+            "title": title,
+            "company": company,
+            "location": location,
+            "date": date,
+            "company_logo": company_logo,
+            "job_description": job_description,
+            "status": "",
+        }
+        return job_offer
+
+
+def parse_myworkdayjobs_job(soup):
+    script = soup.find("script")
+    meta = soup.find("meta", property="og:image")
+    logo = meta["content"]
+    print(logo)
+
+    script_content = script.string
+    script_content_json = json.loads(script_content)
+
+    company_name = script_content_json["hiringOrganization"]["name"]
+    print(company_name)
+
+    job_title = script_content_json["title"]
+    print(job_title)
+
+    job_description = script_content_json["description"]
+
+    location = (
+        script_content_json["jobLocation"]["address"]["addressCountry"]
+        + ", "
+        + script_content_json["jobLocation"]["address"]["addressLocality"]
+    )
+    print(location)
+
+    date = script_content_json["datePosted"]
+    print(date)
+
+    job_offer = {
+        "title": job_title,
+        "company": company_name,
+        "location": location,
+        "date": date,
+        "company_logo": logo,
+        "job_description": job_description,
+    }
+    return job_offer
 
 
 if __name__ == "__main__":
