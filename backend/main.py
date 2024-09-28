@@ -2,7 +2,7 @@ from shlex import quote
 import requests
 from bs4 import BeautifulSoup
 import time
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 import random
 import json
+from threading import Event
+import threading
 
 load_dotenv()
 
@@ -32,6 +34,13 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore DB
 db = firestore.client()
 
+# Global variable to store the current search thread and stop event
+current_search = {
+    "thread": None,
+    "stop_event": None,
+    "generator": None
+}
+
 
 def get_page(url, config, max_retries=5, base_delay=1, max_delay=60):
     """Fetch the page content from the given URL with retries and exponential backoff."""
@@ -39,7 +48,11 @@ def get_page(url, config, max_retries=5, base_delay=1, max_delay=60):
 
     for attempt in range(max_retries):
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=10,
+            )
 
             if response.status_code == 200:
                 print(f"Page retrieved successfully: {url}")
@@ -69,14 +82,18 @@ def get_page(url, config, max_retries=5, base_delay=1, max_delay=60):
     return None
 
 
-def parse_jobs_from_page(config):
+def parse_jobs_from_page(config, stop_event):
     """Parse job offers from LinkedIn pages based on the search queries in config."""
     all_job_offers = []
     for query in config["search_queries"]:
+        if stop_event.is_set():
+            break
         keywords = quote(query["keywords"])
         location = quote(query["location"])
 
         for page_num in range(config["pages_to_scrape"]):
+            if stop_event.is_set():
+                break
             url = (
                 f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
                 f"keywords={keywords}&location={location}&f_TPR=&f_E={query['experience_level']}"
@@ -86,10 +103,15 @@ def parse_jobs_from_page(config):
             soup = get_page(url, config)
             if soup:
                 jobs = parse_job_details(soup)
-                all_job_offers.extend(jobs)
-
-            # Add a delay between requests to different pages
+                for job in jobs:
+                    if stop_event.is_set():
+                        break
+                    yield job
+            if stop_event.is_set():
+                break
             time.sleep(random.uniform(2, 5))
+        if stop_event.is_set():
+            break
 
     print(f"Total job cards scraped: {len(all_job_offers)}")
     return all_job_offers
@@ -199,34 +221,44 @@ def get_job_description(job, config):
 
 @app.route("/offers", methods=["POST"])
 def get_offers():
-    """Endpoint to scrape and return job offers based on the provided search config."""
-    global latest_job_offers
     try:
         config = request.get_json()
         print(config)
 
-        if (
-            not config
-            or "search_queries" not in config
-            or not isinstance(config["search_queries"], list)
-        ):
+        if not config or "search_queries" not in config or not isinstance(config["search_queries"], list):
             return jsonify({"error": "Invalid configuration"}), 400
 
-        latest_job_offers = parse_jobs_from_page(config)
+        # Stop any ongoing search
+        stop_ongoing_search()
 
-        for job in latest_job_offers:
-            job["job_description"] = get_job_description(job, config)
+        # Create a new stop event for this search
+        stop_event = Event()
+        
+        def generate():
+            job_offers = parse_jobs_from_page(config, stop_event)
+            for job in job_offers:
+                if stop_event.is_set():
+                    break
+                job["job_description"] = get_job_description(job, config)
+                yield json.dumps(job) + "\n"
+                if stop_event.is_set():
+                    break
 
-        if not latest_job_offers:
-            return jsonify({"message": "No job offers found"}), 404
+        # Update the current search information
+        current_search["stop_event"] = stop_event
+        current_search["generator"] = generate()
 
-        return (
-            jsonify(latest_job_offers),
-            200,
-        )
+        return Response(current_search["generator"], mimetype='application/x-ndjson')
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+def stop_ongoing_search():
+    if current_search["stop_event"]:
+        current_search["stop_event"].set()
+    current_search["stop_event"] = None
+    current_search["generator"] = None
 
 
 @app.route("/offers/latest", methods=["GET"])
@@ -743,7 +775,6 @@ def add_manually_favorite():
             user_data = user_doc.to_dict()
             favorites = user_data.get("favorites", [])
 
-            # Ajouter l'offre à la liste des favoris si elle n'y est pas déjà
             if job_offer not in favorites:
                 favorites.append(job_offer)
                 user_ref.update({"favorites": favorites})

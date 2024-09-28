@@ -6,8 +6,8 @@ export default function Home({ handleButtonClick }) {
   const { isAuthenticated } = useAuth0();
 
   return (
-    <div className='flex-1 items-center justify-center py-10'>
-      <div className='flex flex-col p-10 gap-8 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-lg justify-center h-full '>
+    <div className='flex-1 flex items-center justify-center py-10'>
+      <div className='flex flex-col p-10 gap-8 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-lg h-[80vh] overflow-y-auto'>
         <h2 className='text-3xl font-semibold text-gray-800'>Job Finder</h2>
         <p className='text-lg text-gray-700'>
           Welcome to Job Finder, the ultimate web app designed to simplify your job search and
@@ -42,12 +42,33 @@ export default function Home({ handleButtonClick }) {
         <p className='text-lg text-gray-700 mt-6'>
           Get started now and take control of your job search!
         </p>
+        <h3 className='text-2xl font-semibold text-gray-800 mt-8'>How Search Works</h3>
+        <p className='text-lg text-gray-700'>
+          Our search process is designed to provide you with the most relevant and up-to-date job offers:
+        </p>
+        <ul className='list-disc pl-5 text-gray-700'>
+          <li>When you initiate a search, we query multiple job boards and sources in real-time.</li>
+          <li>Job offers are fetched and displayed one by one as they become available.</li>
+          <li>This approach ensures you see the latest opportunities as soon as they're found.</li>
+          <li>Keep an eye on the results as they populate - new offers may appear at any time during your search session!</li>
+        </ul>
+        <h3 className='text-2xl font-semibold text-gray-800 mt-8'>Manual Job Addition</h3>
+        <p className='text-lg text-gray-700'>
+          In addition to our automatic search, you can manually add job offers:
+        </p>
+        <ul className='list-disc pl-5 text-gray-700'>
+          <li>Use the "Add Job" button to manually input job details.</li>
+          <li>Paste a LinkedIn or Workday job link to automatically fill in most information.</li>
+          <li>For other job sources, you can manually enter all the necessary details.</li>
+          <li>This feature allows you to include opportunities from various sources in your job search process.</li>
+        </ul>
+
         {isAuthenticated ? (
           <button
             onClick={() => handleButtonClick('search')}
             className='bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300'
           >
-            Get Started
+            Start Searching
           </button>
         ) : (
           <LoginButton

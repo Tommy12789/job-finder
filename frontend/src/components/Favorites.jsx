@@ -299,7 +299,7 @@ export default function Favorites({
             >
               <div className='flex gap-2 items-center mb-2'>
                 <img
-                  className='w-9 h-9 rounded-full border'
+                  className='w-9 h-9 rounded-full border '
                   src={offer.company_logo}
                   alt=''
                 />

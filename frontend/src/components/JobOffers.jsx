@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import Tooltip from '@mui/material/Tooltip';
 
-function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
+function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearching }) {
   const [selectedOffer, setSelectedOffer] = useState(null);
+
+  useEffect(() => {
+    if (jobOffers.length > 0 && !selectedOffer) {
+      setSelectedOffer(jobOffers[0]);
+    }
+  }, [jobOffers, selectedOffer]);
 
   const handleSelectOffer = (offer) => {
     setSelectedOffer(offer);
@@ -22,8 +28,10 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
     <div className='flex flex-1'>
       {/* Left panel - Job offers list */}
       <div className='w-2/5 border-slate-300 flex flex-col'>
-        <h2 className='p-4 text-xl font-semibold  text-center border-b'>
-          {jobOffers.length > 0
+        <h2 className='p-4 text-xl font-semibold text-center border-b'>
+          {isSearching
+            ? 'Searching for job offers...'
+            : jobOffers.length > 0
             ? `${jobOffers.length} job offer${jobOffers.length > 1 ? 's' : ''} found`
             : 'No job offers found'}
         </h2>
@@ -132,7 +140,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers }) {
           </>
         ) : (
           <p className='flex items-center justify-center text-slate-700 text-xl h-full w-full '>
-            Please select an offer to view the details.
+            {isSearching ? 'Searching for job offers...' : 'Please select an offer to view the details.'}
           </p>
         )}
       </div>
