@@ -21,7 +21,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
   };
 
   const isFavorite = (offer) => {
-    return favoriteJobOffers.some((fav) => fav.title === offer.title);
+    return favoriteJobOffers.some((fav) => fav.job_url === offer.job_url);
   };
 
   return (
