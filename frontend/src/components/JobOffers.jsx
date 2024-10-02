@@ -133,14 +133,15 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
                 <strong>Date:</strong> {selectedOffer.date}
               </p>
               <p className='text-slate-700 mb-2'>
-                <strong>Job URL:</strong>{' '}
                 <a
                   href={selectedOffer.job_url}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-blue-600 hover:text-blue-800'
                 >
-                  {selectedOffer.job_url}
+                  <button className='bg-white text-slate-700 hover:bg-slate-300 transition-all ease-in-out duration-300 border p-2 rounded-lg w-full'>
+                    View on LinkedIn
+                  </button>
                 </a>
               </p>
             </div>
