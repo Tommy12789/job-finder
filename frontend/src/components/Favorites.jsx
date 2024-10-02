@@ -15,6 +15,7 @@ export default function Favorites({
   user,
   setFavoriteJobOffers,
 }) {
+  const [isVisible, setIsVisible] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [descriptionTab, setDescriptionTab] = useState('description');
   const [textAreaText, setTextAreaText] = useState('');
@@ -23,6 +24,11 @@ export default function Favorites({
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (formData) => {
     try {
@@ -43,7 +49,14 @@ export default function Favorites({
 
       const data = await response.json();
       console.log(data);
-      setFavoriteJobOffers((prevFavoriteJobOffers) => [...prevFavoriteJobOffers, data.job_offer]);
+
+      // Ensure job_url is set correctly
+      const newJobOffer = {
+        ...data.job_offer,
+        job_url: formData, // Use the submitted link as job_url
+      };
+
+      setFavoriteJobOffers((prevFavoriteJobOffers) => [...prevFavoriteJobOffers, newJobOffer]);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -124,6 +137,11 @@ export default function Favorites({
 
   const handleApplicationProgressClick = async (jobOffer, status) => {
     try {
+      if (!jobOffer.job_url) {
+        console.error('Job URL is missing');
+        return;
+      }
+
       const response = await fetch('http://127.0.0.1:5000/update-application-progress', {
         method: 'POST',
         headers: {
@@ -254,9 +272,13 @@ export default function Favorites({
   };
 
   return (
-    <div className='flex flex-1'>
+    <div className={`flex flex-1 transition-opacity duration-500 ${
+      isVisible ? 'opacity-100' : 'opacity-0'
+    }`}>
       {/* Left panel - Favorites list */}
-      <div className='w-2/5 border-slate-300 flex flex-col'>
+      <div className={`w-2/5 border-slate-300 flex flex-col transform transition-all duration-500 ${
+        isVisible ? 'translate-y-0' : 'translate-y-10'
+      }`}>
         <h2 className='text-xl font-semibold mb-4 mt-4 text-center'>
           {favoriteJobOffers.length > 0
             ? `You have ${favoriteJobOffers.length} offer${
@@ -299,7 +321,7 @@ export default function Favorites({
             >
               <div className='flex gap-2 items-center mb-2'>
                 <img
-                  className='w-9 h-9 rounded-full border '
+                  className='w-9 h-9 rounded-full border bg-slate-500'
                   src={offer.company_logo}
                   alt=''
                 />
@@ -395,13 +417,15 @@ export default function Favorites({
       </div>
 
       {/* Right panel - Selected offer details */}
-      <div className='w-3/5 h-full overflow-y-auto'>
+      <div className={`w-3/5 h-full overflow-y-auto transform transition-all duration-500 ${
+        isVisible ? 'translate-y-0' : 'translate-y-10'
+      }`}>
         {selectedOffer ? (
           <>
             <div className='border-b p-4'>
               <div className='flex gap-4 items-center mb-4'>
                 <img
-                  className='rounded-full border w-16 h-16'
+                  className='rounded-full border w-16 h-16 bg-slate-500'
                   src={selectedOffer.company_logo}
                   alt=''
                 />

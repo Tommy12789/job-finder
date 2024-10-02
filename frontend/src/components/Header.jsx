@@ -2,14 +2,20 @@ import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Profile from './Profile';
 import LoginButton from './LoginButton';
 import LogoutButton from './LogoutButton';
 
 export default function Header({ selectedSection, isAuthenticated, handleButtonClick }) {
+  const [isVisible, setIsVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   function Capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -23,7 +29,9 @@ export default function Header({ selectedSection, isAuthenticated, handleButtonC
   };
 
   return (
-    <header className='bg-slate-50 w-full py-2 flex items-center justify-between px-10 text-slate-700'>
+    <header className={`bg-slate-50 w-full py-2 flex items-center justify-between px-10 text-slate-700 ${
+      isVisible ? 'animate-slideInBottom' : 'translate-y-full opacity-0'
+    }`}>
       <p>{Capitalize(selectedSection)}</p>
       <button
         onClick={handleClick}

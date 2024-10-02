@@ -18,11 +18,11 @@ import '@fontsource/roboto/700.css';
 function App() {
   const [jobOffers, setJobOffers] = useState([]);
   const [favoriteJobOffers, setFavoriteJobOffers] = useState([]);
-  const [loading, setLoading] = useState(false);
   const { isAuthenticated, user } = useAuth0();
   const [selectedSection, setSelectedSection] = useState('home');
   const [activeButton, setActiveButton] = useState('home');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchId, setSearchId] = useState(0);
 
   const handleButtonClick = (section) => {
     setActiveButton(section);
@@ -109,6 +109,9 @@ function App() {
   const handleSearch = async (config) => {
     setJobOffers([]);
     setIsSearching(true);
+    const currentSearchId = searchId + 1;
+    setSearchId(currentSearchId);
+
     try {
       const response = await fetch('http://127.0.0.1:5000/offers', {
         method: 'POST',
@@ -131,12 +134,14 @@ function App() {
         if (done) break;
         const chunk = decoder.decode(value);
         const jobs = chunk.split('\n').filter(Boolean).map(JSON.parse);
-        setJobOffers(prevOffers => [...prevOffers, ...jobs]);
+        setJobOffers((prevOffers) => [...prevOffers, ...jobs]);
       }
     } catch (error) {
       console.error('Erreur lors de la requête :', error);
     } finally {
-      setIsSearching(false);
+      if (currentSearchId === searchId) {
+        setIsSearching(false);
+      }
     }
   };
 

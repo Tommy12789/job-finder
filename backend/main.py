@@ -35,11 +35,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Global variable to store the current search thread and stop event
-current_search = {
-    "thread": None,
-    "stop_event": None,
-    "generator": None
-}
+current_search = {"thread": None, "stop_event": None, "generator": None}
 
 
 def get_page(url, config, max_retries=5, base_delay=1, max_delay=60):
@@ -118,48 +114,34 @@ def parse_jobs_from_page(config, stop_event):
 
 
 def parse_job_details(soup):
-    """Parse the individual job details from the soup object."""
     joblist = []
     if not soup:
         return joblist
 
     try:
-        divs = soup.find_all("div", class_="base-search-card__info")
+        divs = soup.find_all("div", class_="base-card__full-link")
+        for item in divs:
+            info = item.find("div", class_="base-search-card__info")
+            if info:
+                title = info.find("h3", class_="base-search-card__title").text.strip()
+                company = info.find("a", class_="hidden-nested-link")
+                location = info.find("div", class_="job-search-card__location")
+                job_posting_id = item.get('data-entity-urn', '').split(':')[-1]
+                job_url = f"https://www.linkedin.com/jobs/view/{job_posting_id}/"
+                
+                job = {
+                    "title": title,
+                    "company": company.text.strip() if company else "",
+                    "location": location.text.strip() if location else "",
+                    "job_url": job_url,
+                    "job_description": "",
+                    "company_logo": "",
+                    "cover_letter": "",
+                    "status": "",
+                }
+                joblist.append(job)
     except Exception as e:
         print(f"Error parsing job details: {e}")
-        return joblist
-
-    for item in divs:
-        try:
-            title = item.find("h3").text.strip()
-            company = item.find("a", class_="hidden-nested-link")
-            location = item.find("span", class_="job-search-card__location")
-            parent_div = item.parent
-            entity_urn = parent_div["data-entity-urn"]
-            job_posting_id = entity_urn.split(":")[-1]
-            job_url = f"https://www.linkedin.com/jobs/view/{job_posting_id}/"
-            date_tag = item.find(
-                "time", class_="job-search-card__listdate"
-            ) or item.find("time", class_="job-search-card__listdate--new")
-            date = date_tag["datetime"] if date_tag else ""
-
-            logo_img = parent_div.find("img", class_="artdeco-entity-image")
-            logo_url = logo_img["data-delayed-url"] if logo_img else ""
-
-            job = {
-                "title": title,
-                "company": company.text.strip().replace("\n", " ") if company else "",
-                "location": location.text.strip() if location else "",
-                "date": date,
-                "job_url": job_url,
-                "job_description": "",
-                "company_logo": logo_url,
-                "cover_letter": "",
-                "status": "",
-            }
-            joblist.append(job)
-        except Exception as e:
-            print(f"Error parsing a job card: {e}")
 
     return joblist
 
@@ -225,7 +207,11 @@ def get_offers():
         config = request.get_json()
         print(config)
 
-        if not config or "search_queries" not in config or not isinstance(config["search_queries"], list):
+        if (
+            not config
+            or "search_queries" not in config
+            or not isinstance(config["search_queries"], list)
+        ):
             return jsonify({"error": "Invalid configuration"}), 400
 
         # Stop any ongoing search
@@ -233,7 +219,7 @@ def get_offers():
 
         # Create a new stop event for this search
         stop_event = Event()
-        
+
         def generate():
             job_offers = parse_jobs_from_page(config, stop_event)
             for job in job_offers:
@@ -248,7 +234,7 @@ def get_offers():
         current_search["stop_event"] = stop_event
         current_search["generator"] = generate()
 
-        return Response(current_search["generator"], mimetype='application/x-ndjson')
+        return Response(current_search["generator"], mimetype="application/x-ndjson")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -879,6 +865,7 @@ def parse_myworkdayjobs_job(soup):
         "date": date,
         "company_logo": logo,
         "job_description": job_description,
+        "status": "",
     }
     return job_offer
 

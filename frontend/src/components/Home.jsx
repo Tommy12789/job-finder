@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginButton from './LoginButton';
 import { useAuth0 } from '@auth0/auth0-react';
 
 export default function Home({ handleButtonClick }) {
   const { isAuthenticated } = useAuth0();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 300); // Délai légèrement plus long pour laisser le temps à la Sidebar et au Header d'apparaître
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className='flex-1 flex items-center justify-center py-10'>
-      <div className='flex flex-col p-10 gap-8 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-lg h-[80vh] overflow-y-auto'>
+    <div className={`flex-1 flex items-center justify-center py-10 transition-opacity duration-500 ${
+      isVisible ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <div className={`flex flex-col p-10 gap-8 max-w-3xl mx-auto bg-gray-50 rounded-lg shadow-lg h-[80vh] overflow-y-auto transform transition-all duration-500 ${
+        isVisible ? 'translate-y-0' : 'translate-y-10'
+      }`}>
         <h2 className='text-3xl font-semibold text-gray-800'>Job Finder</h2>
         <p className='text-lg text-gray-700'>
           Welcome to Job Finder, the ultimate web app designed to simplify your job search and

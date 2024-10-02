@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 function JobSearchForm({ onSearch }) {
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ function JobSearchForm({ onSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex flex-row px-10 py-6 text-slate-800 justify-between w-full'
+      className='flex flex-row px-10 py-6 text-slate-800 justify-between w-full animate-slideInBottom'
     >
       <div className='flex gap-5 w-3/4'>
         <div className='w-1/3'>
@@ -76,6 +77,7 @@ function JobSearchForm({ onSearch }) {
             <option value='4'>Senior</option>
             <option value='5'>Lead</option>
             <option value='6'>Manager</option>
+            <option value=''></option>
           </select>
         </div>
       </div>
@@ -90,5 +92,9 @@ function JobSearchForm({ onSearch }) {
     </form>
   );
 }
+
+JobSearchForm.propTypes = {
+  onSearch: PropTypes.func.isRequired,
+};
 
 export default JobSearchForm;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HomeIcon from '@mui/icons-material/Home';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -11,13 +11,19 @@ import logo from '/white_logo.svg';
 export default function Sidebar({ activeButton, handleButtonClick }) {
   // État pour garder la trace du bouton actif
   const { isAuthenticated } = useAuth0();
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Fonction pour gérer le clic et changer le bouton actif
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   console.log(isAuthenticated);
 
   return (
-    <aside className='border-r h-screen flex flex-col justify-between items-center px-2 py-4 fill-current text-slate-600 border-slate-400'>
+    <aside className={`border-r h-screen flex flex-col justify-between items-center px-2 py-4 fill-current text-slate-600 border-slate-400 transform ${
+      isVisible ? 'animate-slideInLeft' : '-translate-x-full'
+    }`}>
       <div className='items-center flex flex-col gap-3'>
         <div className='rounded-full bg-slate-50 border border-slate-900  text-slate-50 fill-current'>
           <img

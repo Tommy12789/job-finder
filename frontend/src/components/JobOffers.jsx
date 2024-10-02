@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
 import Tooltip from '@mui/material/Tooltip';
@@ -25,7 +26,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
   };
 
   return (
-    <div className='flex flex-1'>
+    <div className='flex flex-1 animate-slideInBottom'>
       {/* Left panel - Job offers list */}
       <div className='w-2/5 border-slate-300 flex flex-col'>
         <h2 className='p-4 text-xl font-semibold text-center border-b'>
@@ -49,7 +50,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
             >
               <p className='flex gap-2 items-center mb-2'>
                 <img
-                  className='w-9 h-9 rounded-full border '
+                  className='w-9 h-9 rounded-full border bg-slate-500'
                   src={offer.company_logo}
                   alt=''
                 />
@@ -88,10 +89,10 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
             </li>
           ))}
           {isSearching && (
-            <div className='flex flex-1 items-center justify-center h-1/5'>
+            <div className='flex flex-1 items-center justify-center py-3'>
               <svg
                 aria-hidden='true'
-                className='fill-slate-700 flex  items-center  w-24 h-24 text-slate-200 animate-spin'
+                className='fill-slate-700 flex  items-center  w-12 h-12 text-slate-200 animate-spin'
                 viewBox='0 0 100 101'
                 fill='none'
                 xmlns='http://www.w3.org/2000/svg'
@@ -116,7 +117,7 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
             <div className='border-b p-4'>
               <p className='flex gap-4 items-center mb-4'>
                 <img
-                  className='rounded-full border w-16 h-16'
+                  className='rounded-full border w-16 h-16 bg-slate-500'
                   src={selectedOffer.company_logo}
                   alt=''
                 />
@@ -169,5 +170,12 @@ function JobOffers({ jobOffers, handleFavoriteClick, favoriteJobOffers, isSearch
     </div>
   );
 }
+
+JobOffers.propTypes = {
+  jobOffers: PropTypes.array.isRequired,
+  handleFavoriteClick: PropTypes.func.isRequired,
+  favoriteJobOffers: PropTypes.array.isRequired,
+  isSearching: PropTypes.bool.isRequired,
+};
 
 export default JobOffers;

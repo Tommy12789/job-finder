@@ -133,11 +133,11 @@ export default function Settings({ user }) {
 
   return (
     <div
-      className='flex row'
+      className='flex row '
       style={{ height: 'calc(100vh - 40px)' }}
     >
       <div className='bg-slate-100 w-full h-100 pt-10 pl-10 pb-10 flex'>
-        <div className='bg-slate-50 w-full h-max mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
+        <div className='bg-slate-50 w-full h-max mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col animate-slideInBottom'>
           <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'>
             {' '}
             Personnal informations{' '}
@@ -261,8 +261,8 @@ export default function Settings({ user }) {
           </div>
         </div>
       </div>
-      <div className='bg-slate-100 h-full w-full pr-10 pt-10 pb-10 flex'>
-        <div className='bg-slate-50 w-full h-full mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col'>
+      <div className='bg-slate-100 h-full w-full pr-10 pt-10 pb-10 flex '>
+        <div className='bg-slate-50 w-full h-full mx-5 rounded-lg shadow-sm border-slate-200 border-2 flex flex-col animate-slideInBottom'>
           <h2 className='text-2xl font-medium py-6 border-b w-full px-10 text-slate-900'>
             {' '}
             Document upload{' '}
