@@ -119,27 +119,46 @@ def parse_job_details(soup):
         return joblist
 
     try:
-        divs = soup.find_all("div", class_="base-card__full-link")
-        for item in divs:
-            info = item.find("div", class_="base-search-card__info")
-            if info:
-                title = info.find("h3", class_="base-search-card__title").text.strip()
-                company = info.find("a", class_="hidden-nested-link")
-                location = info.find("div", class_="job-search-card__location")
-                job_posting_id = item.get('data-entity-urn', '').split(':')[-1]
-                job_url = f"https://www.linkedin.com/jobs/view/{job_posting_id}/"
+        # Recherche des cartes d'emploi avec une classe plus générique
+        job_cards = soup.find_all("div", class_="base-card")
+        
+        for card in job_cards:
+            try:
+                # Extraction du titre
+                title_elem = card.find("h3", class_="base-search-card__title")
+                title = title_elem.text.strip() if title_elem else "N/A"
+                
+                # Extraction de l'entreprise
+                company_elem = card.find("h4", class_="base-search-card__subtitle")
+                company = company_elem.text.strip() if company_elem else "N/A"
+                
+                # Extraction de la localisation
+                location_elem = card.find("span", class_="job-search-card__location")
+                location = location_elem.text.strip() if location_elem else "N/A"
+                
+                # Extraction de l'URL du job
+                link_elem = card.find("a", class_="base-card__full-link")
+                job_url = link_elem['href'] if link_elem else "N/A"
+                
+                # Extraction du logo de l'entreprise
+                logo_elem = card.find("img", class_="artdeco-entity-image")
+                company_logo = logo_elem['data-delayed-url'] if logo_elem else ""
                 
                 job = {
                     "title": title,
-                    "company": company.text.strip() if company else "",
-                    "location": location.text.strip() if location else "",
+                    "company": company,
+                    "location": location,
                     "job_url": job_url,
                     "job_description": "",
-                    "company_logo": "",
+                    "company_logo": company_logo,
                     "cover_letter": "",
                     "status": "",
                 }
                 joblist.append(job)
+            except Exception as e:
+                print(f"Error parsing individual job card: {e}")
+                continue
+
     except Exception as e:
         print(f"Error parsing job details: {e}")
 
